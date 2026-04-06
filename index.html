@@ -14,344 +14,411 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
 :root {
-  --accent: #2563EB;
-  --accent-light: #EFF6FF;
-  --accent-text: #1D4ED8;
-  --bg: #F2F2F7;
-  --surface: #FFFFFF;
-  --surface2: #E5E5EA;
-  --border: rgba(0,0,0,0.1);
-  --text: #1A1A1A;
-  --muted: #6B7280;
-  --danger: #E24B4A;
-  --danger-light: #FEE2E2;
-  --success: #1D9E75;
-  --success-light: #D1FAE5;
-  --warning: #F59E0B;
-  --radius: 14px;
-  --sb: env(safe-area-inset-bottom, 0px);
-  --st: env(safe-area-inset-top, 0px);
+  --accent:#2563EB; --accent-light:#EFF6FF; --accent-text:#1D4ED8;
+  --bg:#F2F2F7; --surface:#FFFFFF; --surface2:#E5E5EA;
+  --border:rgba(0,0,0,0.1); --text:#1A1A1A; --muted:#6B7280;
+  --danger:#E24B4A; --danger-light:#FEE2E2;
+  --success:#1D9E75; --success-light:#D1FAE5;
+  --warning:#F59E0B; --warning-light:#FEF3C7;
+  --radius:14px; --sb:env(safe-area-inset-bottom,0px); --st:env(safe-area-inset-top,0px);
 }
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme:dark) {
   :root {
-    --bg: #000;
-    --surface: #1C1C1E;
-    --surface2: #2C2C2E;
-    --border: rgba(255,255,255,0.1);
-    --text: #F5F5F7;
-    --muted: #8E8E93;
-    --accent-light: #1E3A5F;
-    --accent-text: #60A5FA;
-    --danger-light: #7F1D1D;
-    --success-light: #064E3B;
+    --bg:#000; --surface:#1C1C1E; --surface2:#2C2C2E;
+    --border:rgba(255,255,255,0.1); --text:#F5F5F7; --muted:#8E8E93;
+    --accent-light:#1E3A5F; --accent-text:#60A5FA;
+    --danger-light:#7F1D1D; --success-light:#064E3B; --warning-light:#78350F;
   }
 }
+html { height:100%; overflow:hidden; }
+body { height:100%; background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-serif; overflow:hidden; padding-top:var(--st); }
 
-html { height: 100%; overflow: hidden; }
-body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; overflow: hidden; padding-top: var(--st); }
+/* ── Login / Loading ── */
+.login-screen,.loading-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:20px; padding:32px; }
+.spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-text { font-size:14px; color:var(--muted); }
+.login-logo { font-size:48px; }
+.login-title { font-size:24px; font-weight:700; letter-spacing:-.03em; }
+.login-sub { font-size:14px; color:var(--muted); text-align:center; line-height:1.6; }
+.google-btn { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 24px; cursor:pointer; font-size:15px; font-weight:600; font-family:'Noto Sans JP',sans-serif; color:var(--text); touch-action:manipulation; width:100%; max-width:280px; justify-content:center; }
+.google-btn svg { width:20px; height:20px; flex-shrink:0; }
+.login-note { font-size:11px; color:var(--muted); text-align:center; line-height:1.8; }
 
-.shell { display: flex; flex-direction: column; height: 100%; max-width: 480px; margin: 0 auto; }
+/* ── Profile setup screen ── */
+.setup-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:0; padding:32px; }
+.setup-card { background:var(--surface); border-radius:20px; padding:28px 24px; width:100%; max-width:400px; }
+.setup-card h2 { font-size:20px; font-weight:700; margin-bottom:6px; }
+.setup-card .sub { font-size:13px; color:var(--muted); margin-bottom:24px; line-height:1.6; }
+.setup-card label { font-size:12px; font-weight:700; color:var(--muted); display:block; margin-bottom:6px; letter-spacing:.05em; text-transform:uppercase; }
+.setup-card input { width:100%; font-size:16px; font-family:'Noto Sans JP',sans-serif; padding:12px 14px; border:.5px solid var(--border); border-radius:10px; background:var(--surface2); color:var(--text); margin-bottom:16px; }
+.setup-card input:focus { outline:none; border-color:var(--accent); }
+.setup-card .hint { font-size:11px; color:var(--muted); margin-top:-10px; margin-bottom:16px; }
+.setup-submit { width:100%; padding:14px; font-size:16px; font-weight:700; font-family:'Noto Sans JP',sans-serif; border:none; border-radius:12px; background:var(--accent); color:white; cursor:pointer; margin-top:4px; touch-action:manipulation; }
+.setup-submit:active { opacity:.8; }
 
-/* Topbar */
-.topbar { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px 10px; background: var(--bg); border-bottom: 0.5px solid var(--border); gap: 8px; }
-.topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.topbar h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; flex-shrink: 0; }
-.user-chip { display: flex; align-items: center; gap: 5px; background: var(--surface); border: 0.5px solid var(--border); border-radius: 20px; padding: 4px 10px 4px 6px; cursor: pointer; min-width: 0; max-width: 140px; touch-action: manipulation; }
-.user-avatar { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; flex-shrink: 0; }
-.user-chip-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-chip-empty { font-size: 12px; color: var(--muted); }
-.topbar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.month-nav { display: flex; align-items: center; gap: 3px; }
-.month-nav button { background: var(--surface); border: 0.5px solid var(--border); border-radius: 7px; width: 28px; height: 28px; cursor: pointer; font-size: 15px; color: var(--muted); display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
-.month-nav span { font-size: 12px; font-weight: 500; font-family: 'DM Mono', monospace; min-width: 52px; text-align: center; }
-.gas-badge { font-size: 11px; padding: 4px 8px; border-radius: 20px; font-weight: 600; cursor: pointer; border: none; touch-action: manipulation; white-space: nowrap; }
-.gas-badge.connected { background: var(--success-light); color: #065F46; }
-.gas-badge.disconnected { background: var(--danger-light); color: #991B1B; }
-@media (prefers-color-scheme: dark) {
-  .gas-badge.connected { color: #6EE7B7; }
-  .gas-badge.disconnected { color: #FCA5A5; }
-}
+/* ── Shell ── */
+.shell { display:flex; flex-direction:column; height:100%; max-width:480px; margin:0 auto; }
+.topbar { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:12px 16px 10px; background:var(--bg); border-bottom:.5px solid var(--border); gap:8px; }
+.topbar-left { display:flex; align-items:center; gap:8px; min-width:0; }
+.topbar h1 { font-size:17px; font-weight:700; letter-spacing:-.02em; flex-shrink:0; }
+.user-chip { display:flex; align-items:center; gap:5px; background:var(--surface); border:.5px solid var(--border); border-radius:20px; padding:4px 10px 4px 6px; cursor:pointer; min-width:0; max-width:160px; touch-action:manipulation; }
+.user-avatar-initials { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:white; flex-shrink:0; background:var(--accent); }
+.user-chip-name { font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.topbar-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.month-nav { display:flex; align-items:center; gap:3px; }
+.month-nav button { background:var(--surface); border:.5px solid var(--border); border-radius:7px; width:28px; height:28px; cursor:pointer; font-size:15px; color:var(--muted); display:flex; align-items:center; justify-content:center; touch-action:manipulation; }
+.month-nav span { font-size:12px; font-weight:500; font-family:'DM Mono',monospace; min-width:52px; text-align:center; }
+.gas-badge { font-size:11px; padding:4px 8px; border-radius:20px; font-weight:600; cursor:pointer; border:none; touch-action:manipulation; white-space:nowrap; }
+.gas-badge.connected { background:var(--success-light); color:#065F46; }
+.gas-badge.disconnected { background:var(--danger-light); color:#991B1B; }
+@media (prefers-color-scheme:dark) { .gas-badge.connected { color:#6EE7B7; } .gas-badge.disconnected { color:#FCA5A5; } }
 
-/* Content */
-.content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 16px; }
+.content { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px 16px; }
+.tabbar { flex-shrink:0; display:flex; background:var(--surface); border-top:.5px solid var(--border); padding-bottom:var(--sb); }
+.tabbar-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:8px 0; border:none; background:none; cursor:pointer; color:var(--muted); font-family:'Noto Sans JP',sans-serif; touch-action:manipulation; transition:color .15s; }
+.tabbar-btn.active { color:var(--accent); }
+.tabbar-icon { font-size:21px; line-height:1; }
+.tabbar-label { font-size:10px; font-weight:500; }
+.panel { display:none; }
+.panel.active { display:block; }
+.section-label { font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.07em; text-transform:uppercase; margin-bottom:9px; }
 
-/* Tabbar */
-.tabbar { flex-shrink: 0; display: flex; background: var(--surface); border-top: 0.5px solid var(--border); padding-bottom: var(--sb); }
-.tabbar-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 8px 0; border: none; background: none; cursor: pointer; color: var(--muted); font-family: 'Noto Sans JP', sans-serif; touch-action: manipulation; transition: color 0.15s; }
-.tabbar-btn.active { color: var(--accent); }
-.tabbar-icon { font-size: 21px; line-height: 1; }
-.tabbar-label { font-size: 10px; font-weight: 500; }
+/* ── Profile banner ── */
+.profile-banner { background:var(--surface); border:.5px solid var(--border); border-radius:12px; padding:12px 14px; display:flex; align-items:center; gap:10px; margin-bottom:14px; cursor:pointer; touch-action:manipulation; }
+.profile-banner:active { opacity:.7; }
+.profile-banner .pb-avatar { width:36px; height:36px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:white; flex-shrink:0; }
+.profile-banner .pb-info { flex:1; min-width:0; }
+.profile-banner .pb-name { font-size:14px; font-weight:600; }
+.profile-banner .pb-role { font-size:11px; color:var(--muted); margin-top:2px; }
+.profile-banner .pb-ss { font-size:11px; color:var(--accent); margin-top:2px; display:flex; align-items:center; gap:4px; }
+.profile-banner .pb-ss.none { color:var(--danger); }
+.profile-banner .pb-arrow { color:var(--muted); font-size:14px; flex-shrink:0; }
 
-/* Panels */
-.panel { display: none; }
-.panel.active { display: block; }
+/* ── SS create button ── */
+.ss-create-btn { width:100%; padding:13px; font-size:14px; font-weight:600; font-family:'Noto Sans JP',sans-serif; border-radius:12px; border:.5px solid var(--accent); background:var(--accent-light); color:var(--accent-text); cursor:pointer; margin-bottom:14px; touch-action:manipulation; display:flex; align-items:center; justify-content:center; gap:6px; }
+.ss-create-btn:active { opacity:.7; }
 
-/* Section label */
-.section-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 9px; }
-
-/* Projects */
-.projects { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 12px; }
-.project-card { padding: 13px 14px; border-radius: var(--radius); border: 1.5px solid var(--border); background: var(--surface); cursor: pointer; text-align: left; position: relative; overflow: hidden; font-family: 'Noto Sans JP', sans-serif; touch-action: manipulation; -webkit-user-select: none; transition: border-color 0.15s, background 0.15s; }
-.project-card:active { opacity: 0.75; }
-.project-card.selected { border-color: var(--accent); background: var(--accent-light); }
-.project-card.has-active { border-color: var(--success); background: var(--success-light); }
-.project-card .dot { width: 9px; height: 9px; border-radius: 50%; margin-bottom: 9px; display: block; }
-.project-card .pname { font-size: 14px; font-weight: 500; display: block; line-height: 1.3; }
-.project-card.selected .pname { color: var(--accent-text); }
-.project-card.has-active .pname { color: #065F46; }
-@media (prefers-color-scheme: dark) { .project-card.has-active .pname { color: #6EE7B7; } }
-.project-card .ptime { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 5px; display: block; }
-.project-card .active-badge { position: absolute; top: 8px; right: 8px; font-size: 9px; font-weight: 700; background: var(--success); color: white; padding: 2px 6px; border-radius: 10px; }
-.project-card .del-btn { position: absolute; top: 7px; right: 7px; width: 22px; height: 22px; background: var(--danger); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 13px; color: white; border: none; cursor: pointer; touch-action: manipulation; line-height: 1; }
-
-/* Edit mode */
-.projects.edit-mode .project-card { animation: wobble 0.35s ease-in-out infinite alternate; }
-.projects.edit-mode .project-card .active-badge { display: none; }
-.projects.edit-mode .project-card .del-btn { display: flex; }
+/* ── Projects ── */
+.projects { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px; }
+.project-card { padding:13px 14px; border-radius:var(--radius); border:1.5px solid var(--border); background:var(--surface); cursor:pointer; text-align:left; position:relative; overflow:hidden; font-family:'Noto Sans JP',sans-serif; touch-action:manipulation; -webkit-user-select:none; transition:border-color .15s,background .15s; }
+.project-card:active { opacity:.75; }
+.project-card.selected { border-color:var(--accent); background:var(--accent-light); }
+.project-card.has-active { border-color:var(--success); background:var(--success-light); }
+.project-card .dot { width:9px; height:9px; border-radius:50%; margin-bottom:9px; display:block; }
+.project-card .pname { font-size:14px; font-weight:500; display:block; line-height:1.3; }
+.project-card.selected .pname { color:var(--accent-text); }
+.project-card.has-active .pname { color:#065F46; }
+@media (prefers-color-scheme:dark) { .project-card.has-active .pname { color:#6EE7B7; } }
+.project-card .ptime { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:5px; display:block; }
+.project-card .active-badge { position:absolute; top:8px; right:8px; font-size:9px; font-weight:700; background:var(--success); color:white; padding:2px 6px; border-radius:10px; }
+.project-card .del-btn { position:absolute; top:7px; right:7px; width:22px; height:22px; background:var(--danger); border-radius:50%; display:none; align-items:center; justify-content:center; font-size:13px; color:white; border:none; cursor:pointer; touch-action:manipulation; line-height:1; }
+.projects.edit-mode .project-card { animation:wobble .35s ease-in-out infinite alternate; }
+.projects.edit-mode .project-card .active-badge { display:none; }
+.projects.edit-mode .project-card .del-btn { display:flex; }
 @keyframes wobble { 0%{transform:rotate(-1.5deg)} 100%{transform:rotate(1.5deg)} }
+.projects-footer { display:flex; gap:7px; margin-bottom:16px; align-items:stretch; }
+.add-project-row { display:flex; gap:7px; flex:1; }
+.add-project-row input { flex:1; font-size:16px; font-family:'Noto Sans JP',sans-serif; padding:10px 12px; border:.5px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); }
+.add-project-row input:focus { outline:none; border-color:var(--accent); }
+.add-project-row select { font-size:18px; width:44px; border:.5px solid var(--border); border-radius:10px; background:var(--surface); cursor:pointer; }
+.add-project-row .add-btn { padding:10px 12px; font-size:13px; border-radius:10px; border:.5px solid var(--border); background:var(--surface2); cursor:pointer; color:var(--text); font-family:'Noto Sans JP',sans-serif; touch-action:manipulation; white-space:nowrap; }
+.edit-toggle { padding:10px 12px; font-size:12px; font-weight:700; border-radius:10px; border:.5px solid var(--border); background:var(--surface); cursor:pointer; color:var(--muted); font-family:'Noto Sans JP',sans-serif; touch-action:manipulation; white-space:nowrap; flex-shrink:0; }
+.edit-toggle.on { background:var(--danger-light); color:var(--danger); border-color:var(--danger); }
 
-/* Projects footer */
-.projects-footer { display: flex; gap: 7px; margin-bottom: 16px; align-items: stretch; }
-.add-project-row { display: flex; gap: 7px; flex: 1; }
-.add-project-row input { flex: 1; font-size: 16px; font-family: 'Noto Sans JP', sans-serif; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); }
-.add-project-row input:focus { outline: none; border-color: var(--accent); }
-.add-project-row select { font-size: 18px; width: 44px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); cursor: pointer; }
-.add-project-row .add-btn { padding: 10px 12px; font-size: 13px; border-radius: 10px; border: 0.5px solid var(--border); background: var(--surface2); cursor: pointer; color: var(--text); font-family: 'Noto Sans JP', sans-serif; touch-action: manipulation; white-space: nowrap; }
-.edit-toggle { padding: 10px 12px; font-size: 12px; font-weight: 700; border-radius: 10px; border: 0.5px solid var(--border); background: var(--surface); cursor: pointer; color: var(--muted); font-family: 'Noto Sans JP', sans-serif; touch-action: manipulation; white-space: nowrap; flex-shrink: 0; }
-.edit-toggle.on { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
-
-/* Clock IO */
-.clockio-area { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 0 14px; }
-.current-time { font-family: 'DM Mono', monospace; font-size: 38px; font-weight: 500; letter-spacing: 0.03em; }
-.clockio-btn { width: 130px; height: 130px; border-radius: 50%; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; font-family: 'Noto Sans JP', sans-serif; touch-action: manipulation; -webkit-user-select: none; transition: transform 0.15s; }
-.clockio-btn:active { transform: scale(0.92); }
-.clockio-btn.idle { background: var(--surface2); border: 2.5px solid var(--border); color: var(--muted); }
-.clockio-btn.active { background: var(--success); color: white; animation: pulse-green 2s ease-in-out infinite; }
-.clockio-btn .btn-icon { font-size: 28px; line-height: 1; }
-.clockio-btn .btn-label { font-size: 14px; font-weight: 700; }
+/* ── Clock IO ── */
+.clockio-area { display:flex; flex-direction:column; align-items:center; gap:12px; padding:8px 0 14px; }
+.current-time { font-family:'DM Mono',monospace; font-size:38px; font-weight:500; letter-spacing:.03em; }
+.clockio-btn { width:130px; height:130px; border-radius:50%; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; font-family:'Noto Sans JP',sans-serif; touch-action:manipulation; -webkit-user-select:none; transition:transform .15s; }
+.clockio-btn:active { transform:scale(.92); }
+.clockio-btn.idle { background:var(--surface2); border:2.5px solid var(--border); color:var(--muted); }
+.clockio-btn.clocked { background:var(--success); color:white; animation:pulse-green 2s ease-in-out infinite; }
+.clockio-btn .btn-icon { font-size:28px; line-height:1; }
+.clockio-btn .btn-label { font-size:14px; font-weight:700; }
 @keyframes pulse-green { 0%,100%{box-shadow:0 0 0 0 rgba(29,158,117,.35)} 50%{box-shadow:0 0 0 18px rgba(29,158,117,0)} }
-.clockio-status { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.6; min-height: 2.5em; }
-.clockio-status .elapsed { color: var(--success); font-weight: 700; font-family: 'DM Mono', monospace; font-size: 15px; }
-.clockio-status .warn { color: var(--danger); }
+.clockio-status { font-size:13px; color:var(--muted); text-align:center; line-height:1.6; min-height:2.5em; }
+.clockio-status .elapsed { color:var(--success); font-weight:700; font-family:'DM Mono',monospace; font-size:15px; }
+.clockio-status .warn { color:var(--danger); }
+.memo-row { margin-bottom:14px; }
+.memo-row input { width:100%; font-size:16px; font-family:'Noto Sans JP',sans-serif; padding:10px 12px; border:.5px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); }
+.memo-row input:focus { outline:none; border-color:var(--accent); }
 
-/* Memo */
-.memo-row { margin-bottom: 14px; }
-.memo-row input { width: 100%; font-size: 16px; font-family: 'Noto Sans JP', sans-serif; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); }
-.memo-row input:focus { outline: none; border-color: var(--accent); }
+/* ── Alert banner ── */
+.lunch-alert { display:none; background:var(--warning-light); border:.5px solid var(--warning); border-radius:12px; padding:12px 14px; margin-bottom:14px; font-size:13px; color:#92400E; line-height:1.6; }
+.lunch-alert.show { display:block; }
+@media (prefers-color-scheme:dark) { .lunch-alert { color:#FCD34D; } }
 
-/* Records */
-.records { display: flex; flex-direction: column; gap: 6px; }
-.record { background: var(--surface); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; border: 0.5px solid var(--border); }
-.record .rdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.record .rinfo { flex: 1; min-width: 0; }
-.record .rname { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.record .rmeta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 3px; }
-.record .ruser { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.record .rmemo { font-size: 11px; color: var(--muted); margin-top: 2px; font-style: italic; }
-.record .rtime { font-size: 14px; font-family: 'DM Mono', monospace; font-weight: 500; flex-shrink: 0; }
-.record .rsync { font-size: 10px; padding: 2px 5px; border-radius: 4px; flex-shrink: 0; }
-.record .rsync.ok { background: var(--success-light); color: #065F46; }
-.record .rsync.ng { background: #FEF3C7; color: #92400E; }
-@media (prefers-color-scheme: dark) { .record .rsync.ok { color: #6EE7B7; } .record .rsync.ng { background:#78350F; color:#FCD34D; } }
-.record .rdel { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 4px 6px; border-radius: 6px; flex-shrink: 0; touch-action: manipulation; }
-.record .rdel:active { color: var(--danger); }
+/* ── Records ── */
+.records { display:flex; flex-direction:column; gap:6px; }
+.record { background:var(--surface); border-radius:12px; padding:12px 14px; display:flex; align-items:center; gap:10px; border:.5px solid var(--border); }
+.record .rdot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.record .rinfo { flex:1; min-width:0; }
+.record .rname { font-size:14px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.record .rmeta { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:3px; }
+.record .rmemo { font-size:11px; color:var(--muted); margin-top:2px; font-style:italic; }
+.record .rtime { font-size:14px; font-family:'DM Mono',monospace; font-weight:500; flex-shrink:0; }
+.record .rsync { font-size:10px; padding:2px 5px; border-radius:4px; flex-shrink:0; }
+.record .rsync.ok { background:var(--success-light); color:#065F46; }
+.record .rsync.ng { background:#FEF3C7; color:#92400E; }
+@media (prefers-color-scheme:dark) { .record .rsync.ok { color:#6EE7B7; } .record .rsync.ng { background:#78350F; color:#FCD34D; } }
+.record .rdel { background:none; border:none; color:var(--muted); cursor:pointer; font-size:15px; padding:4px 6px; border-radius:6px; flex-shrink:0; touch-action:manipulation; }
+.record .rdel:active { color:var(--danger); }
 
-/* Monthly */
-.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 14px; }
-.metric { background: var(--surface); border-radius: 12px; padding: 14px 16px; border: 0.5px solid var(--border); }
-.metric .mlabel { font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 500; }
-.metric .mvalue { font-size: 24px; font-weight: 500; font-family: 'DM Mono', monospace; letter-spacing: -0.02em; }
-.chart-wrap { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; }
-.chart-title { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
-.bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
-.bar-label { font-size: 12px; color: var(--text); width: 88px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bar-track { flex: 1; height: 20px; background: var(--surface2); border-radius: 5px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 5px; transition: width 0.5s ease; }
-.bar-val { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); width: 42px; text-align: right; flex-shrink: 0; }
+/* ── Monthly ── */
+.summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:14px; }
+.metric { background:var(--surface); border-radius:12px; padding:14px 16px; border:.5px solid var(--border); }
+.metric .mlabel { font-size:11px; color:var(--muted); margin-bottom:5px; font-weight:500; }
+.metric .mvalue { font-size:24px; font-weight:500; font-family:'DM Mono',monospace; letter-spacing:-.02em; }
+.chart-wrap { background:var(--surface); border:.5px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; }
+.chart-title { font-size:11px; font-weight:700; color:var(--muted); margin-bottom:12px; letter-spacing:.06em; text-transform:uppercase; }
+.bar-row { display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+.bar-label { font-size:12px; color:var(--text); width:88px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bar-track { flex:1; height:20px; background:var(--surface2); border-radius:5px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:5px; transition:width .5s ease; }
+.bar-val { font-size:11px; font-family:'DM Mono',monospace; color:var(--muted); width:42px; text-align:right; flex-shrink:0; }
+.action-btn { width:100%; padding:14px; font-size:15px; font-family:'Noto Sans JP',sans-serif; font-weight:500; border-radius:12px; border:.5px solid var(--border); background:var(--surface); cursor:pointer; color:var(--text); margin-bottom:9px; touch-action:manipulation; }
+.action-btn:active { opacity:.7; }
+.action-btn.primary { background:var(--accent); color:white; border-color:transparent; }
+.empty { text-align:center; padding:2.5rem; font-size:14px; color:var(--muted); }
 
-/* Action buttons */
-.action-btn { width: 100%; padding: 14px; font-size: 15px; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; border-radius: 12px; border: 0.5px solid var(--border); background: var(--surface); cursor: pointer; color: var(--text); margin-bottom: 9px; touch-action: manipulation; }
-.action-btn:active { opacity: 0.7; }
-.action-btn.primary { background: var(--accent); color: white; border-color: transparent; }
-
-.empty { text-align: center; padding: 2.5rem; font-size: 14px; color: var(--muted); }
-
-/* Modal (bottom sheet) */
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: flex-end; justify-content: center; }
-.modal-bg.open { display: flex; }
-.modal { background: var(--surface); border-radius: 20px 20px 0 0; padding: 20px 20px calc(16px + var(--sb)); width: 100%; max-height: 85vh; overflow-y: auto; }
-.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
-.modal h2 { font-size: 17px; font-weight: 700; margin-bottom: 14px; }
-.modal label { font-size: 12px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
-.modal input { width: 100%; font-size: 16px; font-family: 'Noto Sans JP', sans-serif; padding: 12px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface2); color: var(--text); margin-bottom: 12px; }
-.modal input:focus { outline: none; border-color: var(--accent); }
-.modal-btns { display: flex; gap: 9px; margin-top: 4px; }
-.modal-btns button { flex: 1; padding: 14px; font-size: 15px; border-radius: 12px; border: 0.5px solid var(--border); cursor: pointer; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; touch-action: manipulation; }
-.modal-btns .save-btn { background: var(--accent); color: white; border-color: transparent; }
-.modal-btns .cancel-btn { background: var(--surface2); color: var(--text); }
-
-/* User list */
-.user-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; max-height: 40vh; overflow-y: auto; }
-.user-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: var(--surface2); border-radius: 10px; cursor: pointer; touch-action: manipulation; }
-.user-item:active { opacity: 0.7; }
-.user-item.current { background: var(--accent-light); }
-.uavatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; }
-.uname { flex: 1; font-size: 14px; font-weight: 500; }
-.uname.cur { color: var(--accent-text); }
-.u-check { font-size: 16px; color: var(--accent); flex-shrink: 0; }
-.u-del { background: none; border: none; font-size: 16px; color: var(--muted); cursor: pointer; padding: 4px 6px; touch-action: manipulation; flex-shrink: 0; }
-.u-del:active { color: var(--danger); }
-.user-add-row { display: flex; gap: 8px; margin-bottom: 14px; }
-.user-add-row input { flex: 1; font-size: 16px; font-family: 'Noto Sans JP', sans-serif; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface2); color: var(--text); }
-.user-add-row input:focus { outline: none; border-color: var(--accent); }
-.user-add-row button { padding: 10px 16px; font-size: 14px; border-radius: 10px; border: none; background: var(--accent); color: white; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; font-weight: 600; touch-action: manipulation; }
-
-/* GAS steps */
-.steps { background: var(--surface2); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: 12px; color: var(--muted); line-height: 2.1; }
-.steps b { color: var(--text); font-weight: 600; }
-
-/* Install banner */
-.install-banner { display: none; background: var(--accent); color: white; padding: 10px 16px; font-size: 13px; align-items: center; gap: 10px; flex-shrink: 0; }
-.install-banner.show { display: flex; }
-.install-banner span { flex: 1; }
-.install-banner button { background: white; color: var(--accent); border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; font-weight: 700; cursor: pointer; }
-.install-banner .cls { background: none; color: rgba(255,255,255,.7); font-size: 18px; padding: 4px; }
+/* ── Modals ── */
+.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; align-items:flex-end; justify-content:center; }
+.modal-bg.open { display:flex; }
+.modal { background:var(--surface); border-radius:20px 20px 0 0; padding:20px 20px calc(16px + var(--sb)); width:100%; max-height:85vh; overflow-y:auto; }
+.modal-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 16px; }
+.modal h2 { font-size:17px; font-weight:700; margin-bottom:14px; }
+.modal label { font-size:12px; font-weight:700; color:var(--muted); display:block; margin-bottom:6px; letter-spacing:.04em; text-transform:uppercase; }
+.modal input { width:100%; font-size:16px; font-family:'Noto Sans JP',sans-serif; padding:12px 14px; border:.5px solid var(--border); border-radius:10px; background:var(--surface2); color:var(--text); margin-bottom:12px; }
+.modal input:focus { outline:none; border-color:var(--accent); }
+.modal-btns { display:flex; gap:9px; margin-top:4px; }
+.modal-btns button { flex:1; padding:14px; font-size:15px; border-radius:12px; border:.5px solid var(--border); cursor:pointer; font-family:'Noto Sans JP',sans-serif; font-weight:500; touch-action:manipulation; }
+.modal-btns .save-btn { background:var(--accent); color:white; border-color:transparent; }
+.modal-btns .cancel-btn { background:var(--surface2); color:var(--text); }
+.account-info { display:flex; align-items:center; gap:12px; padding:14px; background:var(--surface2); border-radius:12px; margin-bottom:16px; }
+.account-photo { width:44px; height:44px; border-radius:50%; object-fit:cover; }
+.account-photo-initials { width:44px; height:44px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:white; flex-shrink:0; }
+.account-detail { flex:1; min-width:0; }
+.account-name { font-size:15px; font-weight:600; }
+.account-email { font-size:12px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.account-field { padding:12px 14px; background:var(--surface2); border-radius:10px; margin-bottom:8px; }
+.account-field .af-label { font-size:11px; color:var(--muted); font-weight:600; margin-bottom:3px; }
+.account-field .af-value { font-size:14px; font-weight:500; }
+.account-field .af-link { font-size:12px; color:var(--accent); margin-top:3px; word-break:break-all; }
+.steps { background:var(--surface2); border-radius:10px; padding:12px 14px; margin-bottom:14px; font-size:12px; color:var(--muted); line-height:2.1; }
+.steps b { color:var(--text); font-weight:600; }
+.install-banner { display:none; background:var(--accent); color:white; padding:10px 16px; font-size:13px; align-items:center; gap:10px; flex-shrink:0; }
+.install-banner.show { display:flex; }
+.install-banner span { flex:1; }
+.install-banner button { background:white; color:var(--accent); border:none; border-radius:8px; padding:6px 12px; font-size:13px; font-weight:700; cursor:pointer; }
+.install-banner .cls { background:none; color:rgba(255,255,255,.7); font-size:18px; padding:4px; }
 </style>
 </head>
 <body>
-<div class="shell">
 
+<!-- Loading -->
+<div id="screen-loading" class="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-text">読み込み中...</div>
+</div>
+
+<!-- Login -->
+<div id="screen-login" class="login-screen" style="display:none;">
+  <div class="login-logo">⏱</div>
+  <div class="login-title">勤怠記録</div>
+  <div class="login-sub">Googleアカウントでサインインすると<br>どの端末からでも記録を確認できます</div>
+  <button class="google-btn" onclick="signInWithGoogle()">
+    <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+    Googleでサインイン
+  </button>
+  <div class="login-note">サインイン状態はブラウザに保存されます<br>次回から自動ログインします</div>
+</div>
+
+<!-- Profile setup（初回のみ） -->
+<div id="screen-setup" class="setup-screen" style="display:none;">
+  <div class="setup-card">
+    <h2>プロフィール設定</h2>
+    <p class="sub">氏名と役職を入力してください。<br>スプレッドシートの表紙に自動入力されます。</p>
+    <label>氏名 *</label>
+    <input type="text" id="setup-name" placeholder="例：田中太郎" maxlength="20"/>
+    <label>役職</label>
+    <input type="text" id="setup-role" placeholder="例：ユースワーカー" maxlength="30"/>
+    <p class="hint">役職は後からアカウント設定で変更できます</p>
+    <button class="setup-submit" onclick="saveProfile()">設定を保存して開始</button>
+  </div>
+</div>
+
+<!-- App -->
+<div id="screen-app" style="display:none;">
   <div class="install-banner" id="install-banner">
     <span>ホーム画面に追加するとアプリとして使えます</span>
     <button onclick="installPWA()">追加</button>
     <button class="cls" onclick="document.getElementById('install-banner').classList.remove('show')">✕</button>
   </div>
-
-  <!-- Topbar -->
-  <div class="topbar">
-    <div class="topbar-left">
-      <h1>勤怠</h1>
-      <div class="user-chip" id="user-chip" onclick="openUserModal()">
-        <div class="user-avatar" id="chip-avatar" style="background:#6B7280">?</div>
-        <span class="user-chip-empty" id="chip-name">ユーザー未選択</span>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <div class="month-nav">
-        <button onclick="changeMonth(-1)">‹</button>
-        <span id="month-label"></span>
-        <button onclick="changeMonth(1)">›</button>
-      </div>
-      <button class="gas-badge disconnected" id="gas-badge" onclick="openGasModal()">GAS</button>
-    </div>
-  </div>
-
-  <!-- Content -->
-  <div class="content" id="content">
-
-    <!-- 打刻 Panel -->
-    <div class="panel active" id="panel-clock">
-      <div class="section-label">プロジェクト</div>
-      <div class="projects" id="project-list"></div>
-      <div class="projects-footer">
-        <div class="add-project-row">
-          <select id="new-color">
-            <option value="#2563EB">🔵</option>
-            <option value="#E24B4A">🔴</option>
-            <option value="#1D9E75">🟢</option>
-            <option value="#F59E0B">🟡</option>
-            <option value="#8B5CF6">🟣</option>
-            <option value="#EC4899">🩷</option>
-            <option value="#6B7280">⚪</option>
-          </select>
-          <input type="text" id="new-project-name" placeholder="プロジェクトを追加..."/>
-          <button class="add-btn" onclick="addProject()">追加</button>
+  <div class="shell">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>勤怠</h1>
+        <div class="user-chip" id="user-chip" onclick="openModal('account-modal')">
+          <div class="user-avatar-initials" id="chip-avatar">?</div>
+          <span class="user-chip-name" id="chip-name">...</span>
         </div>
-        <button class="edit-toggle" id="edit-toggle" onclick="toggleEditMode()">編集</button>
       </div>
+      <div class="topbar-right">
+        <div class="month-nav">
+          <button onclick="changeMonth(-1)">‹</button>
+          <span id="month-label"></span>
+          <button onclick="changeMonth(1)">›</button>
+        </div>
+        <button class="gas-badge disconnected" id="gas-badge" onclick="openModal('gas-modal')">GAS</button>
+      </div>
+    </div>
 
-      <div class="section-label">打刻</div>
-      <div class="clockio-area">
-        <div class="current-time" id="current-time">--:--:--</div>
-        <button class="clockio-btn idle" id="clockio-btn" onclick="handleClockIO()">
-          <span id="btn-icon" class="btn-icon">🟢</span>
-          <span id="btn-label" class="btn-label">出勤</span>
+    <div class="content" id="content">
+
+      <!-- 打刻パネル -->
+      <div class="panel active" id="panel-clock">
+
+        <!-- プロフィール＆スプレッドシートバナー -->
+        <div class="profile-banner" onclick="openModal('account-modal')" id="profile-banner">
+          <div class="pb-avatar" id="pb-avatar">?</div>
+          <div class="pb-info">
+            <div class="pb-name" id="pb-name">氏名未設定</div>
+            <div class="pb-role" id="pb-role"></div>
+            <div class="pb-ss none" id="pb-ss">📄 スプレッドシート未設定</div>
+          </div>
+          <div class="pb-arrow">›</div>
+        </div>
+
+        <!-- スプレッドシート新規作成ボタン（SSがない場合のみ表示） -->
+        <button class="ss-create-btn" id="ss-create-btn" onclick="createSpreadsheet()" style="display:none;">
+          ＋ スプレッドシートを新規作成
         </button>
-        <div class="clockio-status" id="clockio-status"></div>
+
+        <div class="section-label">プロジェクト</div>
+        <div class="projects" id="project-list"></div>
+        <div class="projects-footer">
+          <div class="add-project-row">
+            <select id="new-color">
+              <option value="#2563EB">🔵</option>
+              <option value="#E24B4A">🔴</option>
+              <option value="#1D9E75">🟢</option>
+              <option value="#F59E0B">🟡</option>
+              <option value="#8B5CF6">🟣</option>
+              <option value="#EC4899">🩷</option>
+              <option value="#6B7280">⚪</option>
+            </select>
+            <input type="text" id="new-project-name" placeholder="プロジェクトを追加..."/>
+            <button class="add-btn" onclick="addProject()">追加</button>
+          </div>
+          <button class="edit-toggle" id="edit-toggle" onclick="toggleEditMode()">編集</button>
+        </div>
+
+        <div class="section-label">打刻</div>
+        <div class="clockio-area">
+          <div class="current-time" id="current-time">--:--:--</div>
+          <button class="clockio-btn idle" id="clockio-btn" onclick="handleClockIO()">
+            <span id="btn-icon" class="btn-icon">🟢</span>
+            <span id="btn-label" class="btn-label">出勤</span>
+          </button>
+          <div class="clockio-status" id="clockio-status"></div>
+        </div>
+
+        <!-- 昼休憩アラート -->
+        <div class="lunch-alert" id="lunch-alert">
+          ⚠️ <b>昼休憩（12:00〜13:00）が含まれています。</b><br>
+          スプレッドシートのE列（休憩時間等）に手動で入力してください。
+        </div>
+
+        <div class="memo-row">
+          <input type="text" id="memo-input" placeholder="メモ（退勤時に記録されます）..." maxlength="100"/>
+        </div>
       </div>
 
-      <div class="memo-row">
-        <input type="text" id="memo-input" placeholder="メモ（退勤時に記録されます）..." maxlength="100"/>
+      <!-- 記録パネル -->
+      <div class="panel" id="panel-log">
+        <div class="records" id="record-list"></div>
+        <div class="empty" id="log-empty" style="display:none;">この月の記録はありません</div>
+        <button class="action-btn" id="resync-btn" onclick="resyncPending()" style="display:none;margin-top:10px;">🔄 未送信をGASへ再送信</button>
+      </div>
+
+      <!-- 月次パネル -->
+      <div class="panel" id="panel-monthly">
+        <div class="summary-grid">
+          <div class="metric"><div class="mlabel">合計時間</div><div class="mvalue" id="total-hours">0h</div></div>
+          <div class="metric"><div class="mlabel">作業日数</div><div class="mvalue" id="work-days">0日</div></div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">プロジェクト別</div>
+          <div id="bar-chart"></div>
+          <div class="empty" id="chart-empty" style="display:none;">データがありません</div>
+        </div>
+        <button class="action-btn" onclick="exportCSV()">📥 CSVエクスポート</button>
+        <button class="action-btn primary" id="gas-push-btn" onclick="pushAllToGas()" style="display:none;">☁️ スプレッドシートへ送信</button>
       </div>
     </div>
 
-    <!-- 記録 Panel -->
-    <div class="panel" id="panel-log">
-      <div class="records" id="record-list"></div>
-      <div class="empty" id="log-empty" style="display:none;">この月の記録はありません</div>
-      <button class="action-btn" id="resync-btn" onclick="resyncPending()" style="display:none;margin-top:10px;">🔄 未送信をGASへ再送信</button>
-    </div>
-
-    <!-- 月次 Panel -->
-    <div class="panel" id="panel-monthly">
-      <div class="summary-grid">
-        <div class="metric"><div class="mlabel">合計時間</div><div class="mvalue" id="total-hours">0h</div></div>
-        <div class="metric"><div class="mlabel">作業日数</div><div class="mvalue" id="work-days">0日</div></div>
-      </div>
-      <div class="chart-wrap">
-        <div class="chart-title">プロジェクト別</div>
-        <div id="bar-chart"></div>
-        <div class="empty" id="chart-empty" style="display:none;">データがありません</div>
-      </div>
-      <button class="action-btn" onclick="exportCSV()">📥 CSVエクスポート</button>
-      <button class="action-btn primary" id="gas-push-btn" onclick="pushAllToGas()" style="display:none;">☁️ スプレッドシートへ送信</button>
-    </div>
-
+    <nav class="tabbar">
+      <button class="tabbar-btn active" id="tab-clock" onclick="switchTab('clock')"><span class="tabbar-icon">⏱</span><span class="tabbar-label">打刻</span></button>
+      <button class="tabbar-btn" id="tab-log" onclick="switchTab('log')"><span class="tabbar-icon">📋</span><span class="tabbar-label">記録</span></button>
+      <button class="tabbar-btn" id="tab-monthly" onclick="switchTab('monthly')"><span class="tabbar-icon">📊</span><span class="tabbar-label">月次</span></button>
+    </nav>
   </div>
-
-  <!-- Tabbar -->
-  <nav class="tabbar">
-    <button class="tabbar-btn active" id="tab-clock" onclick="switchTab('clock')">
-      <span class="tabbar-icon">⏱</span><span class="tabbar-label">打刻</span>
-    </button>
-    <button class="tabbar-btn" id="tab-log" onclick="switchTab('log')">
-      <span class="tabbar-icon">📋</span><span class="tabbar-label">記録</span>
-    </button>
-    <button class="tabbar-btn" id="tab-monthly" onclick="switchTab('monthly')">
-      <span class="tabbar-icon">📊</span><span class="tabbar-label">月次</span>
-    </button>
-  </nav>
 </div>
 
-<!-- User Modal -->
-<div class="modal-bg" id="user-modal" onclick="bgClick(event,'user-modal')">
+<!-- Account modal -->
+<div class="modal-bg" id="account-modal" onclick="bgClick(event,'account-modal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <h2>ユーザー管理</h2>
-    <div class="user-list" id="user-list"></div>
-    <div class="user-add-row">
-      <input type="text" id="new-user-name" placeholder="ユーザー名を入力..." maxlength="20"/>
-      <button onclick="addUser()">追加</button>
+    <h2>アカウント</h2>
+    <div class="account-info" id="account-info"></div>
+    <div class="account-field">
+      <div class="af-label">氏名</div>
+      <div class="af-value" id="af-name">—</div>
     </div>
-    <div class="modal-btns">
-      <button class="cancel-btn" onclick="closeModal('user-modal')">閉じる</button>
+    <div class="account-field">
+      <div class="af-label">役職</div>
+      <div class="af-value" id="af-role">—</div>
+    </div>
+    <div class="account-field">
+      <div class="af-label">スプレッドシート</div>
+      <div class="af-value" id="af-ss-status">未設定</div>
+      <div class="af-link" id="af-ss-link" style="display:none;"></div>
+    </div>
+    <div class="modal-btns" style="margin-top:14px;">
+      <button class="cancel-btn" onclick="openModal('profile-modal');closeModal('account-modal')">プロフィール編集</button>
+      <button class="save-btn" style="background:var(--danger);border-color:transparent;" onclick="signOut()">サインアウト</button>
     </div>
   </div>
 </div>
 
-<!-- GAS Modal -->
+<!-- Profile edit modal -->
+<div class="modal-bg" id="profile-modal" onclick="bgClick(event,'profile-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>プロフィール編集</h2>
+    <label>氏名</label>
+    <input type="text" id="edit-name" maxlength="20"/>
+    <label>役職</label>
+    <input type="text" id="edit-role" maxlength="30"/>
+    <div class="modal-btns">
+      <button class="cancel-btn" onclick="closeModal('profile-modal')">キャンセル</button>
+      <button class="save-btn" onclick="updateProfile()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAS modal -->
 <div class="modal-bg" id="gas-modal" onclick="bgClick(event,'gas-modal')">
   <div class="modal">
     <div class="modal-handle"></div>
     <h2>GAS 連携設定</h2>
     <div class="steps">
       <b>手順</b><br>
-      1. <b>kintai_gas.js</b> を Google Apps Script に貼り付ける<br>
-      2. <b>SPREADSHEET_ID</b> を書き換えて保存<br>
+      1. <b>kintai_gas_v5_temp.js</b> を Google Apps Script に貼り付ける<br>
+      2. Drive API を「サービス」に追加する<br>
       3. 「デプロイ」→「新しいデプロイ」→「ウェブアプリ」<br>
-      4. アクセス：<b>全員</b>、実行：<b>自分</b><br>
+      4. 実行ユーザー：<b>自分</b>、アクセス：<b>全員</b><br>
       5. 表示されたURLを下に貼り付ける
     </div>
     <label>GAS ウェブアプリ URL</label>
@@ -363,446 +430,551 @@ body { height: 100%; background: var(--bg); color: var(--text); font-family: 'No
   </div>
 </div>
 
-<script>
-// PWA
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault(); deferredPrompt = e;
-  if (!matchMedia('(display-mode: standalone)').matches)
-    document.getElementById('install-banner').classList.add('show');
-});
-function installPWA() {
-  if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; document.getElementById('install-banner').classList.remove('show'); }); }
-  else alert('📱 iOSでホーム画面に追加：\nSafariの共有ボタン（↑）→「ホーム画面に追加」');
-}
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut as fbSignOut } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+import { getFirestore, doc, collection, getDoc, setDoc, deleteDoc, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 
-// ── State ────────────────────────────────────────────────────────
-const U_COLORS = ['#2563EB','#E24B4A','#1D9E75','#F59E0B','#8B5CF6','#EC4899','#0891B2','#7C3AED'];
-const DEFAULT_PROJECTS = [
-  {id:'p1',name:'里山合宿',color:'#2563EB'},
-  {id:'p2',name:'ドリーム＋',color:'#1D9E75'},
-  {id:'p3',name:'地域活動',color:'#F59E0B'},
-];
-
-let S = {
-  projects:    JSON.parse(localStorage.getItem('kintai_projects')||'null') || DEFAULT_PROJECTS,
-  records:     JSON.parse(localStorage.getItem('kintai_records')||'[]'),
-  users:       JSON.parse(localStorage.getItem('kintai_users')||'[]'),
-  currentUser: localStorage.getItem('kintai_cur_user')||'',
-  gasUrl:      localStorage.getItem('kintai_gas_url')||'',
-  selProj:     localStorage.getItem('kintai_sel_proj')||'',
-  // 出勤セッション: {userId, projectId, startTime}  ← アプリ再起動後も復元
-  session:     JSON.parse(localStorage.getItem('kintai_session')||'null'),
-  editMode:    false,
-  activeTab:   'clock',
-  curMonth:    new Date().getMonth(),
-  curYear:     new Date().getFullYear(),
+const firebaseConfig = {
+  apiKey: "AIzaSyCZI2MaS_44k1HA2QwMWVewECA63VgHGt0",
+  authDomain: "kintaikanri-app-202601.firebaseapp.com",
+  projectId: "kintaikanri-app-202601",
+  storageBucket: "kintaikanri-app-202601.firebasestorage.app",
+  messagingSenderId: "381260865095",
+  appId: "1:381260865095:web:4154f9d7f94c8f8f33db62"
 };
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
 
-function persist(keys) {
-  const all = !keys;
-  if (all||keys.includes('p'))  localStorage.setItem('kintai_projects',  JSON.stringify(S.projects));
-  if (all||keys.includes('r'))  localStorage.setItem('kintai_records',   JSON.stringify(S.records));
-  if (all||keys.includes('u'))  localStorage.setItem('kintai_users',     JSON.stringify(S.users));
-  if (all||keys.includes('cu')) localStorage.setItem('kintai_cur_user',  S.currentUser);
-  if (all||keys.includes('sp')) { S.selProj ? localStorage.setItem('kintai_sel_proj',S.selProj) : localStorage.removeItem('kintai_sel_proj'); }
-  if (all||keys.includes('s'))  { S.session ? localStorage.setItem('kintai_session',JSON.stringify(S.session)) : localStorage.removeItem('kintai_session'); }
-}
+// ── State ─────────────────────────────────────────────────
+let currentUser = null;
+let S = {
+  projects: [], records: [], session: null,
+  gasUrl: '', selProj: '',
+  curMonth: new Date().getMonth(), curYear: new Date().getFullYear(),
+  // ユーザープロフィール
+  profile: { name: '', role: '', spreadsheetId: '', spreadsheetUrl: '' },
+};
+let unsubProjects=null, unsubRecords=null, unsubSession=null;
+let editMode=false, tickTimer=null;
 
-// ── Helpers ──────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────
 const pad = n => String(n).padStart(2,'0');
 const proj = id => S.projects.find(p=>p.id===id);
-const user = id => S.users.find(u=>u.id===id);
 const fmtTime = ts => { const d=new Date(ts); return pad(d.getHours())+':'+pad(d.getMinutes()); };
 const fmtDate = ts => { const d=new Date(ts); return (d.getMonth()+1)+'/'+d.getDate(); };
-const fmtH  = ms => { const h=ms/3600000; return h.toFixed(h>=10?1:2)+'h'; };
-const uColor = idx => U_COLORS[idx % U_COLORS.length];
-const uInit  = name => (name||'?')[0].toUpperCase();
-
+const fmtH = ms => { const h=ms/3600000; return h.toFixed(h>=10?1:2)+'h'; };
 function monthRecs() {
-  return S.records.filter(r=>{
-    const d=new Date(r.start);
-    return d.getMonth()===S.curMonth && d.getFullYear()===S.curYear;
+  return S.records.filter(r=>{const d=new Date(r.start);return d.getMonth()===S.curMonth&&d.getFullYear()===S.curYear;});
+}
+
+// Firestore paths
+const userDoc     = ()  => doc(db,'users',currentUser.uid);
+const projectsCol = ()  => collection(db,'users',currentUser.uid,'projects');
+const recordsCol  = ()  => collection(db,'users',currentUser.uid,'records');
+const projectDoc  = id  => doc(db,'users',currentUser.uid,'projects',id);
+const recordDoc   = id  => doc(db,'users',currentUser.uid,'records',id);
+
+// ── 昼休憩チェック（12:00〜13:00跨ぎ）─────────────────────
+function checkLunchBreak(startMs, endMs) {
+  const startDate = new Date(startMs);
+  const endDate   = new Date(endMs);
+  const day = startDate.toDateString();
+  const lunch12 = new Date(day + ' 12:00:00').getTime();
+  const lunch13 = new Date(day + ' 13:00:00').getTime();
+  // 出勤〜退勤の間に12:00〜13:00が含まれるか
+  return startMs < lunch13 && endMs > lunch12;
+}
+
+// ── Auth ──────────────────────────────────────────────────
+window.signInWithGoogle = async () => {
+  const provider = new GoogleAuthProvider();
+  try {
+    if (/iPhone|iPad|Android/i.test(navigator.userAgent)) await signInWithRedirect(auth, provider);
+    else await signInWithPopup(auth, provider);
+  } catch(e) { alert('サインインに失敗しました: '+e.message); }
+};
+window.signOut = async () => {
+  if (!confirm('サインアウトしますか？')) return;
+  stopListeners(); await fbSignOut(auth);
+};
+
+getRedirectResult(auth).catch(()=>{});
+onAuthStateChanged(auth, async user => {
+  if (user) { currentUser=user; await onUserSignedIn(); }
+  else { currentUser=null; stopListeners(); showScreen('login'); }
+});
+
+async function onUserSignedIn() {
+  showScreen('loading');
+  try {
+    const snap = await getDoc(userDoc());
+    if (snap.exists()) {
+      const d = snap.data();
+      S.gasUrl  = d.gasUrl  || localStorage.getItem('kintai_gas_url') || '';
+      S.profile = {
+        name:            d.name            || '',
+        role:            d.role            || '',
+        spreadsheetId:   d.spreadsheetId   || '',
+        spreadsheetUrl:  d.spreadsheetUrl  || '',
+      };
+    }
+  } catch(e) { S.gasUrl = localStorage.getItem('kintai_gas_url')||''; }
+
+  // プロフィール未設定なら初期設定画面へ
+  if (!S.profile.name) {
+    showScreen('setup');
+    return;
+  }
+
+  startListeners(); renderUserChip(); updateGasBadge(); updateProfileBanner(); startTick();
+  showScreen('app');
+}
+
+function stopListeners() {
+  if (unsubProjects){unsubProjects();unsubProjects=null;}
+  if (unsubRecords){unsubRecords();unsubRecords=null;}
+  if (unsubSession){unsubSession();unsubSession=null;}
+}
+function startListeners() {
+  unsubProjects = onSnapshot(query(projectsCol(),orderBy('createdAt')), snap=>{
+    S.projects=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderProjects(); renderMonthly(); renderClockIOBtn();
+  });
+  unsubRecords = onSnapshot(query(recordsCol(),orderBy('start','desc')), snap=>{
+    S.records=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderLog(); renderMonthly(); renderProjects();
+  });
+  unsubSession = onSnapshot(userDoc(), snap=>{
+    S.session = snap.exists()&&snap.data().session ? snap.data().session : null;
+    renderClockIOBtn(); renderProjects();
   });
 }
 
-// ── Clock tick ───────────────────────────────────────────────────
-let tickTimer = null;
+// ── Profile setup（初回）──────────────────────────────────
+window.saveProfile = async () => {
+  const name = document.getElementById('setup-name').value.trim();
+  const role = document.getElementById('setup-role').value.trim();
+  if (!name) { alert('氏名を入力してください'); return; }
+  S.profile.name = name;
+  S.profile.role = role;
+  await setDoc(userDoc(), { name, role }, { merge:true });
+  startListeners(); renderUserChip(); updateGasBadge(); updateProfileBanner(); startTick();
+  showScreen('app');
+};
+
+// ── Profile update ────────────────────────────────────────
+window.updateProfile = async () => {
+  const name = document.getElementById('edit-name').value.trim();
+  const role = document.getElementById('edit-role').value.trim();
+  if (!name) { alert('氏名を入力してください'); return; }
+  S.profile.name = name;
+  S.profile.role = role;
+  await setDoc(userDoc(), { name, role }, { merge:true });
+  renderUserChip(); updateProfileBanner(); renderAccountModal();
+  closeModal('profile-modal');
+};
+
+// ── スプレッドシート新規作成 ─────────────────────────────
+window.createSpreadsheet = async () => {
+  if (!S.gasUrl) { alert('先にGAS URLを設定してください（右上の「GAS」ボタン）'); return; }
+  if (!confirm(`「業務日誌（${S.profile.name}）」を新規作成します。よろしいですか？`)) return;
+
+  const btn = document.getElementById('ss-create-btn');
+  btn.textContent = '作成中...'; btn.disabled = true;
+
+  const now = new Date();
+  const res = await gasPost({
+    action:   'create_spreadsheet',
+    userName: S.profile.name,
+    role:     S.profile.role,
+    year:     now.getFullYear(),
+    month:    now.getMonth()+1,
+  });
+
+  btn.textContent = '＋ スプレッドシートを新規作成'; btn.disabled = false;
+
+  if (res?.ok) {
+    S.profile.spreadsheetId  = res.spreadsheetId;
+    S.profile.spreadsheetUrl = res.spreadsheetUrl;
+    await setDoc(userDoc(), {
+      spreadsheetId:  res.spreadsheetId,
+      spreadsheetUrl: res.spreadsheetUrl,
+    }, { merge:true });
+    updateProfileBanner();
+    alert(`✅ スプレッドシートを作成しました。\n\n${res.spreadsheetUrl}`);
+  } else {
+    alert('❌ 作成に失敗しました: '+(res?.error||'不明なエラー'));
+  }
+};
+
+// ── 翌月シート自動作成チェック ────────────────────────────
+async function ensureMonthSheet(year, month) {
+  if (!S.gasUrl || !S.profile.spreadsheetId) return;
+  await gasPost({
+    action:        'create_month_sheet',
+    spreadsheetId: S.profile.spreadsheetId,
+    userName:      S.profile.name,
+    role:          S.profile.role,
+    year, month,
+  });
+}
+
+// ── Clock tick ────────────────────────────────────────────
 function startTick() {
-  clearInterval(tickTimer);
-  tickTimer = setInterval(tick, 1000);
-  tick();
+  clearInterval(tickTimer); tickTimer=setInterval(tick,1000); tick();
 }
 function tick() {
-  const now = new Date();
-  const el = document.getElementById('current-time');
-  if (el) el.textContent = pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+  const now=new Date(), el=document.getElementById('current-time');
+  if (el) el.textContent=pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
   if (S.session) updateSessionStatus();
 }
 function updateSessionStatus() {
-  const el = document.getElementById('clockio-status');
-  if (!el || !S.session) return;
-  const ms = Date.now() - S.session.startTime;
-  const h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000), s=Math.floor((ms%60000)/1000);
-  const p = proj(S.session.projectId);
-  const u = user(S.session.userId);
-  el.innerHTML = `<span class="elapsed">${pad(h)}:${pad(m)}:${pad(s)}</span> 経過<br>${u?.name||''}・${p?.name||''}`;
+  const el=document.getElementById('clockio-status');
+  if (!el||!S.session) return;
+  const ms=Date.now()-S.session.startTime;
+  const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);
+  const p=proj(S.session.projectId);
+  el.innerHTML=`<span class="elapsed">${pad(h)}:${pad(m)}:${pad(s)}</span> 経過<br>${p?.name||''}`;
 }
 
-// ── Clock in / out ───────────────────────────────────────────────
-function handleClockIO() {
-  if (S.editMode) return;
+// ── Clock in / out ────────────────────────────────────────
+window.handleClockIO = async () => {
+  if (editMode) return;
 
   if (!S.session) {
-    // === 出勤 ===
+    // 出勤
     if (!S.selProj) { alert('プロジェクトを選択してください'); return; }
-    if (!S.currentUser) { openUserModal(); return; }
-    S.session = { userId: S.currentUser, projectId: S.selProj, startTime: Date.now() };
-    persist(['s']);
-    renderClockIOBtn();
-    renderProjects();
-  } else {
-    // === 退勤 ===
-    const dur = Date.now() - S.session.startTime;
-    const memo = document.getElementById('memo-input').value.trim();
+    const now = new Date();
+    // 翌月になっていたら月シートを自動作成
+    await ensureMonthSheet(now.getFullYear(), now.getMonth()+1);
+    await setDoc(userDoc(), { session:{ projectId:S.selProj, startTime:Date.now() } }, { merge:true });
 
-    const doSave = () => {
+  } else {
+    // 退勤
+    const endTime = Date.now();
+    const dur     = endTime - S.session.startTime;
+    const memo    = document.getElementById('memo-input').value.trim();
+
+    const doSave = async () => {
+      const id = 'r'+Date.now();
+      const p  = proj(S.session.projectId);
       const rec = {
-        id: 'r'+Date.now(),
-        projectId: S.session.projectId,
-        userId:    S.session.userId,
-        start:     S.session.startTime,
-        end:       Date.now(),
-        duration:  dur,
+        projectId:     S.session.projectId,
+        projectName:   p?.name||'不明',
+        start:         S.session.startTime,
+        end:           endTime,
+        duration:      dur,
         memo,
-        syncStatus: 'pending',
+        syncStatus:    'pending',
+        createdAt:     Date.now(),
       };
-      S.records.push(rec);
-      S.session = null;
+      await Promise.all([
+        setDoc(recordDoc(id), rec),
+        setDoc(userDoc(), { session:null }, { merge:true }),
+      ]);
       document.getElementById('memo-input').value = '';
-      persist(['r','s']);
-      renderClockIOBtn();
-      renderProjects();
-      renderLog();
-      renderMonthly();
-      if (S.gasUrl) gasSendRecord(rec).then(ok=>{ rec.syncStatus=ok?'synced':'pending'; persist(['r']); renderLog(); });
+
+      // 昼休憩アラート表示
+      if (checkLunchBreak(rec.start, rec.end)) {
+        const alert = document.getElementById('lunch-alert');
+        alert.classList.add('show');
+        // 10秒後に自動非表示
+        setTimeout(()=>alert.classList.remove('show'), 10000);
+      }
+
+      // GASへ送信
+      if (S.gasUrl) {
+        gasSendRecord({ id, ...rec }).then(async ok => {
+          if (ok) await setDoc(recordDoc(id), { syncStatus:'synced' }, { merge:true });
+        });
+      }
     };
 
-    if (dur < 30000) {
-      if (confirm('30秒未満の記録です。保存しますか？')) doSave();
-      else { S.session=null; persist(['s']); renderClockIOBtn(); renderProjects(); }
+    if (dur<30000) {
+      if (confirm('30秒未満の記録です。保存しますか？')) await doSave();
+      else await setDoc(userDoc(),{session:null},{merge:true});
     } else {
-      doSave();
+      await doSave();
     }
   }
-}
+};
 
 function renderClockIOBtn() {
-  const btn  = document.getElementById('clockio-btn');
-  const icon = document.getElementById('btn-icon');
-  const lbl  = document.getElementById('btn-label');
-  const status = document.getElementById('clockio-status');
-
+  const btn=document.getElementById('clockio-btn');
+  const icon=document.getElementById('btn-icon');
+  const lbl=document.getElementById('btn-label');
+  const status=document.getElementById('clockio-status');
+  if (!btn) return;
   if (S.session) {
-    btn.className = 'clockio-btn active';
-    icon.textContent = '🔴'; lbl.textContent = '退勤';
+    btn.className='clockio-btn clocked'; icon.textContent='🔴'; lbl.textContent='退勤';
     updateSessionStatus();
   } else {
-    btn.className = 'clockio-btn idle';
-    icon.textContent = '🟢'; lbl.textContent = '出勤';
-    const p = S.selProj ? proj(S.selProj) : null;
-    const u = S.currentUser ? user(S.currentUser) : null;
-    if (p && u) {
-      status.innerHTML = `<b>${u.name}</b> / <b>${p.name}</b>`;
+    btn.className='clockio-btn idle'; icon.textContent='🟢'; lbl.textContent='出勤';
+    const p=S.selProj?proj(S.selProj):null;
+    status.innerHTML = p ? `<b>${p.name}</b> で出勤できます` : `<span class="warn">プロジェクトを選択してください</span>`;
+  }
+}
+
+// ── Profile banner & account modal ───────────────────────
+function updateProfileBanner() {
+  const av   = document.getElementById('pb-avatar');
+  const name = document.getElementById('pb-name');
+  const role = document.getElementById('pb-role');
+  const ss   = document.getElementById('pb-ss');
+  const btn  = document.getElementById('ss-create-btn');
+
+  const n = S.profile.name || '氏名未設定';
+  if (av) { av.textContent = n[0].toUpperCase(); }
+  if (name) name.textContent = n;
+  if (role) role.textContent = S.profile.role || '';
+  if (ss) {
+    if (S.profile.spreadsheetId) {
+      ss.textContent = '📊 スプレッドシート連携済';
+      ss.className = 'pb-ss';
     } else {
-      const warn = [];
-      if (!u) warn.push('ユーザーを選択');
-      if (!p) warn.push('プロジェクトを選択');
-      status.innerHTML = `<span class="warn">${warn.join('・')}してください</span>`;
+      ss.textContent = '📄 スプレッドシート未設定';
+      ss.className = 'pb-ss none';
+    }
+  }
+  // SSがない場合だけ作成ボタンを表示
+  if (btn) btn.style.display = S.profile.spreadsheetId ? 'none' : 'flex';
+}
+
+function renderAccountModal() {
+  const afName   = document.getElementById('af-name');
+  const afRole   = document.getElementById('af-role');
+  const afSs     = document.getElementById('af-ss-status');
+  const afLink   = document.getElementById('af-ss-link');
+  if (afName) afName.textContent = S.profile.name || '—';
+  if (afRole) afRole.textContent = S.profile.role || '—';
+  if (afSs) {
+    if (S.profile.spreadsheetId) {
+      afSs.textContent = '連携済';
+      if (afLink) { afLink.style.display='block'; afLink.innerHTML=`<a href="${S.profile.spreadsheetUrl}" target="_blank">${S.profile.spreadsheetUrl}</a>`; }
+    } else {
+      afSs.textContent = '未設定';
+      if (afLink) afLink.style.display='none';
     }
   }
 }
 
-// ── Projects ─────────────────────────────────────────────────────
-function addProject() {
-  const name = document.getElementById('new-project-name').value.trim();
-  const color = document.getElementById('new-color').value;
+// ── Projects ──────────────────────────────────────────────
+window.addProject = async () => {
+  const name=document.getElementById('new-project-name').value.trim();
+  const color=document.getElementById('new-color').value;
   if (!name) return;
-  S.projects.push({id:'p'+Date.now(), name, color});
-  document.getElementById('new-project-name').value = '';
-  persist(['p']);
-  if (S.gasUrl) gasPost({action:'sync_projects',projects:S.projects});
+  const id='p'+Date.now();
+  await setDoc(projectDoc(id),{name,color,createdAt:Date.now()});
+  document.getElementById('new-project-name').value='';
+};
+window.deleteProject = async id => {
+  if (S.session?.projectId===id){alert('出勤中のプロジェクトは削除できません');return;}
+  const p=proj(id);
+  if (!confirm(`「${p?.name}」を削除しますか？`)) return;
+  await deleteDoc(projectDoc(id));
+  if (S.selProj===id){S.selProj='';renderClockIOBtn();}
+};
+window.selectProject = id => {
+  if (editMode||S.session) return;
+  S.selProj=S.selProj===id?'':id;
+  renderProjects(); renderClockIOBtn();
+};
+window.toggleEditMode = () => {
+  editMode=!editMode;
+  const btn=document.getElementById('edit-toggle');
+  btn.textContent=editMode?'完了':'編集'; btn.classList.toggle('on',editMode);
   renderProjects();
-}
-
-function deleteProject(id) {
-  if (S.session?.projectId === id) { alert('出勤中のプロジェクトは削除できません'); return; }
-  const p = proj(id);
-  if (!p) return;
-  if (!confirm(`「${p.name}」を削除しますか？\n（過去の記録は残ります）`)) return;
-  S.projects = S.projects.filter(x=>x.id!==id);
-  if (S.selProj === id) { S.selProj=''; persist(['sp']); }
-  persist(['p']);
-  renderProjects();
-  renderClockIOBtn();
-}
-
-function selectProject(id) {
-  if (S.editMode || S.session) return;
-  S.selProj = S.selProj===id ? '' : id;
-  persist(['sp']); renderProjects(); renderClockIOBtn();
-}
-
-let editMode = false;
-function toggleEditMode() {
-  editMode = !editMode;
-  const btn = document.getElementById('edit-toggle');
-  btn.textContent = editMode ? '完了' : '編集';
-  btn.classList.toggle('on', editMode);
-  renderProjects();
-}
-
+};
 function renderProjects() {
-  const list = document.getElementById('project-list');
-  list.innerHTML = '';
-  list.classList.toggle('edit-mode', editMode);
-  S.projects.forEach(p => {
-    const ms = monthRecs().filter(r=>r.projectId===p.id).reduce((a,r)=>a+r.duration,0);
-    const isSel = S.selProj===p.id && !editMode;
-    const isActive = S.session?.projectId===p.id;
-    const card = document.createElement('div');
-    card.className = 'project-card'+(isSel?' selected':'')+(isActive?' has-active':'');
-    card.innerHTML = `
-      <span class="dot" style="background:${p.color}"></span>
-      <span class="pname">${p.name}</span>
-      <span class="ptime">${fmtH(ms)}</span>
-      ${isActive&&!editMode ? `<span class="active-badge">出勤中</span>` : ''}
-      <button class="del-btn" onclick="event.stopPropagation();deleteProject('${p.id}')">✕</button>
-    `;
-    card.onclick = () => selectProject(p.id);
+  const list=document.getElementById('project-list');
+  if (!list) return;
+  list.innerHTML=''; list.classList.toggle('edit-mode',editMode);
+  S.projects.forEach(p=>{
+    const ms=monthRecs().filter(r=>r.projectId===p.id).reduce((a,r)=>a+r.duration,0);
+    const isSel=S.selProj===p.id&&!editMode, isActive=S.session?.projectId===p.id;
+    const card=document.createElement('div');
+    card.className='project-card'+(isSel?' selected':'')+(isActive?' has-active':'');
+    card.innerHTML=`<span class="dot" style="background:${p.color}"></span><span class="pname">${p.name}</span><span class="ptime">${fmtH(ms)}</span>${isActive&&!editMode?'<span class="active-badge">出勤中</span>':''}<button class="del-btn" onclick="event.stopPropagation();deleteProject('${p.id}')">✕</button>`;
+    card.onclick=()=>selectProject(p.id);
     list.appendChild(card);
   });
 }
 
-// ── Users ─────────────────────────────────────────────────────────
-function addUser() {
-  const name = document.getElementById('new-user-name').value.trim();
-  if (!name) return;
-  const u = {id:'u'+Date.now(), name, color: uColor(S.users.length)};
-  S.users.push(u);
-  document.getElementById('new-user-name').value = '';
-  if (!S.currentUser) { S.currentUser=u.id; persist(['u','cu']); }
-  else persist(['u']);
-  renderUserList(); renderUserChip(); renderClockIOBtn();
-}
-
-function selectUser(id) {
-  S.currentUser=id; persist(['cu']);
-  renderUserList(); renderUserChip(); renderClockIOBtn();
-  closeModal('user-modal');
-}
-
-function deleteUser(id) {
-  if (S.session?.userId===id) { alert('出勤中のユーザーは削除できません'); return; }
-  if (!confirm(`「${user(id)?.name}」を削除しますか？`)) return;
-  S.users = S.users.filter(u=>u.id!==id);
-  if (S.currentUser===id) { S.currentUser=S.users[0]?.id||''; persist(['cu']); }
-  persist(['u']); renderUserList(); renderUserChip(); renderClockIOBtn();
-}
-
-function renderUserList() {
-  const list = document.getElementById('user-list');
-  if (!list) return;
-  list.innerHTML = '';
-  if (!S.users.length) { list.innerHTML='<div class="empty" style="padding:1rem">ユーザーがいません<br>下から追加してください</div>'; return; }
-  S.users.forEach(u => {
-    const cur = S.currentUser===u.id;
-    const item = document.createElement('div');
-    item.className = 'user-item'+(cur?' current':'');
-    item.innerHTML = `
-      <div class="uavatar" style="background:${u.color}">${uInit(u.name)}</div>
-      <span class="uname${cur?' cur':''}">${u.name}</span>
-      ${cur ? '<span class="u-check">✓</span>' : ''}
-      <button class="u-del" onclick="event.stopPropagation();deleteUser('${u.id}')">✕</button>
-    `;
-    item.onclick = () => selectUser(u.id);
-    list.appendChild(item);
-  });
-}
-
-function renderUserChip() {
-  const av = document.getElementById('chip-avatar');
-  const nm = document.getElementById('chip-name');
-  const u = S.currentUser ? user(S.currentUser) : null;
-  if (u) {
-    av.style.background=u.color; av.textContent=uInit(u.name);
-    nm.textContent=u.name; nm.className='user-chip-name';
-  } else {
-    av.style.background='#6B7280'; av.textContent='?';
-    nm.textContent='ユーザー未選択'; nm.className='user-chip-empty';
-  }
-}
-
-// ── Records ───────────────────────────────────────────────────────
+// ── Records ───────────────────────────────────────────────
 function renderLog() {
-  const recs = monthRecs().slice().reverse();
-  const list = document.getElementById('record-list');
-  const empty = document.getElementById('log-empty');
-  const resync = document.getElementById('resync-btn');
-  list.innerHTML = '';
-  resync.style.display = (S.gasUrl && recs.some(r=>r.syncStatus==='pending')) ? '' : 'none';
-  if (!recs.length) { empty.style.display=''; return; }
+  const recs=monthRecs(), list=document.getElementById('record-list');
+  const empty=document.getElementById('log-empty'), resync=document.getElementById('resync-btn');
+  if (!list) return;
+  list.innerHTML='';
+  if (resync) resync.style.display=(S.gasUrl&&recs.some(r=>r.syncStatus==='pending'))?'':'none';
+  if (!recs.length){empty.style.display='';return;}
   empty.style.display='none';
-  recs.forEach(r => {
-    const p=proj(r.projectId), u=user(r.userId);
-    const sync = S.gasUrl ? `<span class="rsync ${r.syncStatus==='synced'?'ok':'ng'}">${r.syncStatus==='synced'?'✓':'未'}</span>` : '';
+  recs.forEach(r=>{
+    const p=proj(r.projectId);
+    const sync=S.gasUrl?`<span class="rsync ${r.syncStatus==='synced'?'ok':'ng'}">${r.syncStatus==='synced'?'✓':'未'}</span>`:'';
     const row=document.createElement('div'); row.className='record';
-    row.innerHTML=`
-      <span class="rdot" style="background:${p?.color||'#ccc'}"></span>
-      <span class="rinfo">
-        <span class="rname">${p?.name||'不明'}</span>
-        <span class="rmeta">${fmtDate(r.start)} ${fmtTime(r.start)}–${fmtTime(r.end)}</span>
-        ${u?`<span class="ruser">👤 ${u.name}</span>`:''}
-        ${r.memo?`<span class="rmemo">${r.memo}</span>`:''}
-      </span>
-      ${sync}
-      <span class="rtime">${fmtH(r.duration)}</span>
-      <button class="rdel" onclick="deleteRecord('${r.id}')">✕</button>
-    `;
+    row.innerHTML=`<span class="rdot" style="background:${p?.color||'#ccc'}"></span><span class="rinfo"><span class="rname">${r.projectName||p?.name||'不明'}</span><span class="rmeta">${fmtDate(r.start)} ${fmtTime(r.start)}–${fmtTime(r.end)}</span>${r.memo?`<span class="rmemo">${r.memo}</span>`:''}</span>${sync}<span class="rtime">${fmtH(r.duration)}</span><button class="rdel" onclick="deleteRecord('${r.id}')">✕</button>`;
     list.appendChild(row);
   });
 }
-
-async function deleteRecord(id) {
+window.deleteRecord = async id => {
   const r=S.records.find(x=>x.id===id);
-  if (r?.syncStatus==='synced'&&S.gasUrl) gasPost({action:'delete_record',recordId:id});
-  S.records=S.records.filter(x=>x.id!==id);
-  persist(['r']); renderLog(); renderMonthly(); renderProjects();
-}
+  if (r?.syncStatus==='synced'&&S.gasUrl) gasPost({action:'delete_record',recordId:id,spreadsheetId:S.profile.spreadsheetId});
+  await deleteDoc(recordDoc(id));
+};
 
-// ── Monthly ───────────────────────────────────────────────────────
+// ── Monthly ───────────────────────────────────────────────
 function renderMonthly() {
-  const recs=monthRecs();
-  const totalMs=recs.reduce((a,r)=>a+r.duration,0);
+  const recs=monthRecs(), totalMs=recs.reduce((a,r)=>a+r.duration,0);
   const days=new Set(recs.map(r=>new Date(r.start).toDateString())).size;
-  document.getElementById('total-hours').textContent=(totalMs/3600000).toFixed(1)+'h';
-  document.getElementById('work-days').textContent=days+'日';
-  document.getElementById('gas-push-btn').style.display=S.gasUrl?'':'none';
+  const th=document.getElementById('total-hours'),wd=document.getElementById('work-days'),pb=document.getElementById('gas-push-btn');
+  if (th) th.textContent=(totalMs/3600000).toFixed(1)+'h';
+  if (wd) wd.textContent=days+'日';
+  if (pb) pb.style.display=S.gasUrl?'':'none';
+  const chart=document.getElementById('bar-chart'),chartEmpty=document.getElementById('chart-empty');
+  if (!chart) return; chart.innerHTML='';
   const byP={};
-  recs.forEach(r=>{ byP[r.projectId]=(byP[r.projectId]||0)+r.duration; });
-  const chart=document.getElementById('bar-chart'), empty=document.getElementById('chart-empty');
-  chart.innerHTML='';
+  recs.forEach(r=>{byP[r.projectId]=(byP[r.projectId]||0)+r.duration;});
   const sorted=Object.entries(byP).sort((a,b)=>b[1]-a[1]);
-  if (!sorted.length) { empty.style.display=''; return; }
-  empty.style.display='none';
+  if (!sorted.length){chartEmpty.style.display='';return;}
+  chartEmpty.style.display='none';
   const maxMs=sorted[0][1];
   sorted.forEach(([pid,ms])=>{
-    const p=proj(pid);
-    const row=document.createElement('div'); row.className='bar-row';
+    const p=proj(pid); const row=document.createElement('div'); row.className='bar-row';
     row.innerHTML=`<span class="bar-label">${p?.name||'不明'}</span><div class="bar-track"><div class="bar-fill" style="width:${((ms/maxMs)*100).toFixed(1)}%;background:${p?.color||'#ccc'}"></div></div><span class="bar-val">${(ms/3600000).toFixed(1)}h</span>`;
     chart.appendChild(row);
   });
 }
-
-function exportCSV() {
+window.exportCSV = () => {
   const recs=monthRecs();
-  const rows=[['記録ID','日付','プロジェクト','ユーザー','出勤','退勤','時間(h)','メモ']];
+  const rows=[['記録ID','日付','プロジェクト','出勤','退勤','時間(h)','メモ']];
   recs.forEach(r=>{
-    const p=proj(r.projectId), u=user(r.userId);
-    rows.push([r.id,new Date(r.start).toLocaleDateString('ja-JP'),p?.name||'不明',u?.name||'不明',
-      new Date(r.start).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),
-      new Date(r.end).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),
-      (r.duration/3600000).toFixed(2),r.memo||'']);
+    const p=proj(r.projectId);
+    rows.push([r.id,new Date(r.start).toLocaleDateString('ja-JP'),r.projectName||p?.name||'不明',new Date(r.start).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),new Date(r.end).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),(r.duration/3600000).toFixed(2),r.memo||'']);
   });
   const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
   a.download=`勤怠_${S.curYear}_${pad(S.curMonth+1)}.csv`;
   a.click();
-}
+};
 
-// ── GAS ──────────────────────────────────────────────────────────
+// ── GAS ───────────────────────────────────────────────────
 async function gasPost(payload) {
   if (!S.gasUrl) return null;
   try {
     const res=await fetch(S.gasUrl,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain'}});
     return await res.json();
-  } catch(e){ return null; }
+  } catch(e){return null;}
 }
 async function gasSendRecord(rec) {
-  const p=proj(rec.projectId), u=user(rec.userId);
-  const res=await gasPost({action:'add_record',record:{...rec,projectName:p?.name||'不明',userName:u?.name||'不明'}});
+  const res=await gasPost({
+    action:'add_record',
+    record:{
+      ...rec,
+      userName:      S.profile.name,
+      role:          S.profile.role,
+      spreadsheetId: S.profile.spreadsheetId,
+    }
+  });
   return res?.ok===true;
 }
-async function resyncPending() {
+window.resyncPending = async () => {
   const pending=S.records.filter(r=>r.syncStatus==='pending');
-  for (const r of pending) { const ok=await gasSendRecord(r); if(ok) r.syncStatus='synced'; }
-  persist(['r']); renderLog();
-}
-async function pushAllToGas() {
+  for (const r of pending) { const ok=await gasSendRecord(r); if(ok) await setDoc(recordDoc(r.id),{syncStatus:'synced'},{merge:true}); }
+};
+window.pushAllToGas = async () => {
   const recs=monthRecs(); if(!recs.length) return;
   let c=0;
-  for (const r of recs) { const ok=await gasSendRecord(r); if(ok){r.syncStatus='synced';c++;} }
-  persist(['r']); renderLog(); alert(`${c}件を送信しました`);
-}
-
-function openGasModal() { document.getElementById('gas-url-input').value=S.gasUrl; openModal('gas-modal'); }
-async function saveGasUrl() {
+  for (const r of recs) { const ok=await gasSendRecord(r); if(ok){await setDoc(recordDoc(r.id),{syncStatus:'synced'},{merge:true});c++;} }
+  alert(`${c}件を送信しました`);
+};
+window.saveGasUrl = async () => {
   const url=document.getElementById('gas-url-input').value.trim();
-  if (!url) { S.gasUrl=''; localStorage.removeItem('kintai_gas_url'); updateGasBadge(); closeModal('gas-modal'); return; }
-  if (!(url.startsWith('https://script.google.com/macros/s/')&&url.endsWith('/exec'))) {
-    alert('URLの形式が正しくありません。'); return;
-  }
-  S.gasUrl=url; localStorage.setItem('kintai_gas_url',url);
-  try { await fetch(url,{method:'POST',body:JSON.stringify({action:'sync_projects',projects:S.projects}),headers:{'Content-Type':'text/plain'}}); } catch(e){}
+  if (!url){S.gasUrl='';await setDoc(userDoc(),{gasUrl:''},{merge:true});updateGasBadge();closeModal('gas-modal');return;}
+  if (!(url.startsWith('https://script.google.com/macros/s/')&&url.endsWith('/exec'))){alert('URLの形式が正しくありません。');return;}
+  S.gasUrl=url;
+  await setDoc(userDoc(),{gasUrl:url},{merge:true});
   updateGasBadge(); closeModal('gas-modal');
   alert('✅ GAS URLを保存しました。');
-}
+};
 function updateGasBadge() {
-  const b=document.getElementById('gas-badge');
+  const b=document.getElementById('gas-badge'); if (!b) return;
   b.className='gas-badge '+(S.gasUrl?'connected':'disconnected');
   b.textContent=S.gasUrl?'GAS接続済':'GAS';
 }
 
-// ── User modal ────────────────────────────────────────────────────
-function openUserModal() { renderUserList(); openModal('user-modal'); }
+// ── User chip ──────────────────────────────────────────────
+function renderUserChip() {
+  if (!currentUser) return;
+  const av=document.getElementById('chip-avatar'), nm=document.getElementById('chip-name');
+  if (!av||!nm) return;
+  const displayName=S.profile.name||currentUser.displayName||currentUser.email||'ユーザー';
+  nm.textContent=displayName.split(' ')[0];
+  if (currentUser.photoURL) {
+    const img=document.createElement('img'); img.src=currentUser.photoURL; img.className='user-avatar';
+    av.replaceWith(img);
+  } else { av.textContent=displayName[0].toUpperCase(); }
+  // Account modal
+  const info=document.getElementById('account-info');
+  if (info) {
+    const n=currentUser.displayName||'';
+    info.innerHTML=`${currentUser.photoURL?`<img src="${currentUser.photoURL}" class="account-photo"/>`:`<div class="account-photo-initials">${n[0]?.toUpperCase()||'?'}</div>`}<div class="account-detail"><div class="account-name">${n}</div><div class="account-email">${currentUser.email||''}</div></div>`;
+  }
+  renderAccountModal();
+}
 
-// ── Modal helpers ─────────────────────────────────────────────────
-function openModal(id)  { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function bgClick(e,id)  { if(e.target===e.currentTarget) closeModal(id); }
-
-// ── Navigation ────────────────────────────────────────────────────
-function changeMonth(d) {
+// ── Navigation ─────────────────────────────────────────────
+window.changeMonth = d => {
   S.curMonth+=d;
   if(S.curMonth>11){S.curMonth=0;S.curYear++;}
   if(S.curMonth<0){S.curMonth=11;S.curYear--;}
-  renderAll();
-}
-function switchTab(name) {
+  document.getElementById('month-label').textContent=`${S.curYear}.${pad(S.curMonth+1)}`;
+  renderLog(); renderMonthly(); renderProjects();
+};
+window.switchTab = name => {
   ['clock','log','monthly'].forEach(t=>{
     document.getElementById('panel-'+t).classList.toggle('active',t===name);
     document.getElementById('tab-'+t).classList.toggle('active',t===name);
   });
   document.getElementById('content').scrollTop=0;
-  renderAll();
+};
+
+// ── Modal ──────────────────────────────────────────────────
+window.openModal = id => {
+  if (id==='gas-modal') document.getElementById('gas-url-input').value=S.gasUrl;
+  if (id==='profile-modal'){
+    document.getElementById('edit-name').value=S.profile.name;
+    document.getElementById('edit-role').value=S.profile.role;
+  }
+  if (id==='account-modal') renderAccountModal();
+  document.getElementById(id).classList.add('open');
+};
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+window.bgClick = (e,id) => { if(e.target===e.currentTarget) closeModal(id); };
+
+// ── Screen ─────────────────────────────────────────────────
+function showScreen(name) {
+  document.getElementById('screen-loading').style.display=name==='loading'?'flex':'none';
+  document.getElementById('screen-login').style.display=name==='login'?'flex':'none';
+  document.getElementById('screen-setup').style.display=name==='setup'?'flex':'none';
+  document.getElementById('screen-app').style.display=name==='app'?'block':'none';
+  if (name==='app') document.getElementById('month-label').textContent=`${S.curYear}.${pad(S.curMonth+1)}`;
 }
 
-// ── Main render ───────────────────────────────────────────────────
-function renderAll() {
-  document.getElementById('month-label').textContent=`${S.curYear}.${pad(S.curMonth+1)}`;
-  updateGasBadge();
-  renderUserChip();
-  renderProjects();
-  renderClockIOBtn();
-  renderLog();
-  renderMonthly();
-}
-
-// ── Boot ──────────────────────────────────────────────────────────
-startTick();
-renderAll();
+// ── PWA ────────────────────────────────────────────────────
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPrompt=e;
+  if (!matchMedia('(display-mode: standalone)').matches) document.getElementById('install-banner').classList.add('show');
+});
+window.installPWA = () => {
+  if (deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('install-banner').classList.remove('show');});}
+  else alert('📱 iOSでホーム画面に追加：\nSafariの共有ボタン（↑）→「ホーム画面に追加」');
+};
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
 </html>
