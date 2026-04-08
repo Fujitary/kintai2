@@ -1,9 +1,8 @@
 // Service Worker - 勤怠記録 PWA
-const CACHE = 'kintai-v1';
+const CACHE = 'kintai-v3';
 const ASSETS = [
   './index.html',
   './manifest.json',
-  'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap'
 ];
 
 self.addEventListener('install', e => {
@@ -21,9 +20,20 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // GAS への通信はキャッシュしない
-  if (e.request.url.includes('script.google.com')) return;
+  const url = e.request.url;
 
+  // POSTリクエストはキャッシュしない（GAS送信・Firebase通信）
+  if (e.request.method !== 'GET') return;
+
+  // 外部API通信はキャッシュしない
+  if (url.includes('script.google.com')) return;
+  if (url.includes('firestore.googleapis.com')) return;
+  if (url.includes('firebase')) return;
+  if (url.includes('googleapis.com')) return;
+  if (url.includes('gstatic.com')) return;
+  if (url.includes('fonts.googleapis.com')) return;
+
+  // GETリクエストのみキャッシュ
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
