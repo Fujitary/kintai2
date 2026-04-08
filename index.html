@@ -493,9 +493,33 @@ function checkLunchBreak(startMs, endMs) {
 window.signInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
   try {
-    if (/iPhone|iPad|Android/i.test(navigator.userAgent)) await signInWithRedirect(auth, provider);
-    else await signInWithPopup(auth, provider);
-  } catch(e) { alert('サインインに失敗しました: '+e.message); }
+    const ua = navigator.userAgent;
+    // iOS Safari: ITPによりリダイレクト後のセッション復元が失敗するためポップアップを使用
+    // Android / PC: リダイレクト方式
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isInAppBrowser = /FBAN|FBAV|Instagram|Line|Messenger/i.test(ua);
+
+    if (isInAppBrowser) {
+      // アプリ内ブラウザはGoogleにブロックされるため案内を表示
+      alert('このブラウザではサインインできません。\nSafari（iPhone）またはChrome（Android）で\nhttps://fujitary.github.io/kintai2/\nを開いてください。');
+      return;
+    }
+
+    if (isIOS) {
+      // iOSはポップアップ方式
+      await signInWithPopup(auth, provider);
+    } else {
+      // Android・PCはリダイレクト方式
+      await signInWithRedirect(auth, provider);
+    }
+  } catch(e) {
+    console.error('signIn error:', e);
+    if (e.code === 'auth/popup-blocked') {
+      alert('ポップアップがブロックされました。\nブラウザの設定でポップアップを許可してください。');
+    } else if (e.code !== 'auth/cancelled-popup-request') {
+      alert('サインインに失敗しました: ' + e.message);
+    }
+  }
 };
 window.signOut = async () => {
   if (!confirm('サインアウトしますか？')) return;
