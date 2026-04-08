@@ -290,11 +290,6 @@ body { height:100%; background:var(--bg); color:var(--text); font-family:'Noto S
           <div class="pb-arrow">›</div>
         </div>
 
-        <!-- スプレッドシート新規作成ボタン（SSがない場合のみ表示） -->
-        <button class="ss-create-btn" id="ss-create-btn" onclick="createSpreadsheet()" style="display:none;">
-          ＋ スプレッドシートを新規作成
-        </button>
-
         <div class="section-label">プロジェクト</div>
         <div class="projects" id="project-list"></div>
         <div class="projects-footer">
@@ -385,7 +380,13 @@ body { height:100%; background:var(--bg); color:var(--text); font-family:'Noto S
       <div class="af-value" id="af-ss-status">未設定</div>
       <div class="af-link" id="af-ss-link" style="display:none;"></div>
     </div>
-    <div class="modal-btns" style="margin-top:14px;">
+    <div id="ss-input-area" style="margin-bottom:12px;">
+      <label>スプレッドシートID</label>
+      <input type="text" id="ss-id-input" placeholder="スプレッドシートのIDを入力..." style="font-family:'DM Mono',monospace;font-size:13px;"/>
+      <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:12px;">URLの /d/ と /edit の間の文字列</div>
+      <button class="save-btn" style="width:100%;padding:12px;" onclick="saveSpreadsheetId()">スプレッドシートを設定</button>
+    </div>
+    <div class="modal-btns" style="margin-top:4px;">
       <button class="cancel-btn" onclick="openModal('profile-modal');closeModal('account-modal')">プロフィール編集</button>
       <button class="save-btn" style="background:var(--danger);border-color:transparent;" onclick="signOut()">サインアウト</button>
     </div>
@@ -519,6 +520,10 @@ async function onUserSignedIn() {
         spreadsheetId:   d.spreadsheetId   || '',
         spreadsheetUrl:  d.spreadsheetUrl  || '',
       };
+      // メールアドレスが未保存なら保存する
+      if (!d.email && currentUser.email) {
+        setDoc(userDoc(), { email: currentUser.email }, { merge:true });
+      }
     }
   } catch(e) { S.gasUrl = localStorage.getItem('kintai_gas_url')||''; }
 
@@ -569,7 +574,7 @@ window.saveProfile = async () => {
   if (!name) { alert('氏名を入力してください'); return; }
   S.profile.name = name;
   S.profile.role = role;
-  await setDoc(userDoc(), { name, role }, { merge:true });
+  await setDoc(userDoc(), { name, role, email: currentUser.email || '' }, { merge:true });
   showScreen('app');
   startListeners(); renderUserChip(); updateGasBadge(); updateProfileBanner(); startTick();
 };
@@ -581,7 +586,7 @@ window.updateProfile = async () => {
   if (!name) { alert('氏名を入力してください'); return; }
   S.profile.name = name;
   S.profile.role = role;
-  await setDoc(userDoc(), { name, role }, { merge:true });
+  await setDoc(userDoc(), { name, role, email: currentUser.email || '' }, { merge:true });
   renderUserChip(); updateProfileBanner(); renderAccountModal();
   closeModal('profile-modal');
 };
@@ -617,6 +622,29 @@ window.createSpreadsheet = async () => {
   } else {
     alert('❌ 作成に失敗しました: '+(res?.error||'不明なエラー'));
   }
+};
+
+// ── スプレッドシートID手動設定 ───────────────────────────
+window.saveSpreadsheetId = async () => {
+  const input = document.getElementById('ss-id-input').value.trim();
+  if (!input) { alert('スプレッドシートIDを入力してください'); return; }
+
+  // URLが貼られた場合はIDだけ抽出
+  let ssId = input;
+  const match = input.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match) ssId = match[1];
+
+  const ssUrl = `https://docs.google.com/spreadsheets/d/${ssId}/edit`;
+
+  S.profile.spreadsheetId  = ssId;
+  S.profile.spreadsheetUrl = ssUrl;
+  await setDoc(userDoc(), { spreadsheetId: ssId, spreadsheetUrl: ssUrl }, { merge:true });
+
+  document.getElementById('ss-id-input').value = '';
+  updateProfileBanner();
+  renderAccountModal();
+  closeModal('account-modal');
+  alert('✅ スプレッドシートを設定しました。');
 };
 
 // ── 翌月シート自動作成チェック ────────────────────────────
@@ -737,8 +765,6 @@ function updateProfileBanner() {
   const name = document.getElementById('pb-name');
   const role = document.getElementById('pb-role');
   const ss   = document.getElementById('pb-ss');
-  const btn  = document.getElementById('ss-create-btn');
-
   const n = S.profile.name || '氏名未設定';
   if (av) { av.textContent = n[0].toUpperCase(); }
   if (name) name.textContent = n;
@@ -752,25 +778,29 @@ function updateProfileBanner() {
       ss.className = 'pb-ss none';
     }
   }
-  // SSがない場合だけ作成ボタンを表示
-  if (btn) btn.style.display = S.profile.spreadsheetId ? 'none' : 'flex';
+
 }
 
 function renderAccountModal() {
-  const afName   = document.getElementById('af-name');
-  const afRole   = document.getElementById('af-role');
-  const afSs     = document.getElementById('af-ss-status');
-  const afLink   = document.getElementById('af-ss-link');
+  const afName    = document.getElementById('af-name');
+  const afRole    = document.getElementById('af-role');
+  const afSs      = document.getElementById('af-ss-status');
+  const afLink    = document.getElementById('af-ss-link');
+  const ssArea    = document.getElementById('ss-input-area');
+  const ssInput   = document.getElementById('ss-id-input');
+
   if (afName) afName.textContent = S.profile.name || '—';
   if (afRole) afRole.textContent = S.profile.role || '—';
-  if (afSs) {
-    if (S.profile.spreadsheetId) {
-      afSs.textContent = '連携済';
-      if (afLink) { afLink.style.display='block'; afLink.innerHTML=`<a href="${S.profile.spreadsheetUrl}" target="_blank">${S.profile.spreadsheetUrl}</a>`; }
-    } else {
-      afSs.textContent = '未設定';
-      if (afLink) afLink.style.display='none';
-    }
+
+  if (S.profile.spreadsheetId) {
+    if (afSs)   afSs.textContent = '連携済';
+    if (afLink) { afLink.style.display='block'; afLink.innerHTML=`<a href="${S.profile.spreadsheetUrl}" target="_blank" style="color:var(--accent);word-break:break-all;font-size:11px;">${S.profile.spreadsheetUrl}</a>`; }
+    if (ssArea) ssArea.style.display = 'none';  // 設定済みなら入力欄を隠す
+  } else {
+    if (afSs)   afSs.textContent = '未設定';
+    if (afLink) afLink.style.display = 'none';
+    if (ssArea) ssArea.style.display = 'block'; // 未設定なら入力欄を表示
+    if (ssInput) ssInput.value = '';
   }
 }
 
