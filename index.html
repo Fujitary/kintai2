@@ -528,8 +528,8 @@ async function onUserSignedIn() {
     return;
   }
 
-  startListeners(); renderUserChip(); updateGasBadge(); updateProfileBanner(); startTick();
   showScreen('app');
+  startListeners(); renderUserChip(); updateGasBadge(); updateProfileBanner(); startTick();
 }
 
 function stopListeners() {
@@ -547,8 +547,18 @@ function startListeners() {
     renderLog(); renderMonthly(); renderProjects();
   });
   unsubSession = onSnapshot(userDoc(), snap=>{
-    S.session = snap.exists()&&snap.data().session ? snap.data().session : null;
-    renderClockIOBtn(); renderProjects();
+    if (snap.exists()) {
+      const d = snap.data();
+      S.session = d.session || null;
+      // プロフィール情報も最新に保つ
+      if (d.name) S.profile.name = d.name;
+      if (d.role !== undefined) S.profile.role = d.role;
+      if (d.spreadsheetId) { S.profile.spreadsheetId = d.spreadsheetId; S.profile.spreadsheetUrl = d.spreadsheetUrl||''; }
+      if (d.gasUrl !== undefined) S.gasUrl = d.gasUrl;
+    } else {
+      S.session = null;
+    }
+    renderClockIOBtn(); renderProjects(); updateProfileBanner(); updateGasBadge();
   });
 }
 
@@ -560,8 +570,8 @@ window.saveProfile = async () => {
   S.profile.name = name;
   S.profile.role = role;
   await setDoc(userDoc(), { name, role }, { merge:true });
-  startListeners(); renderUserChip(); updateGasBadge(); updateProfileBanner(); startTick();
   showScreen('app');
+  startListeners(); renderUserChip(); updateGasBadge(); updateProfileBanner(); startTick();
 };
 
 // ── Profile update ────────────────────────────────────────
@@ -719,6 +729,10 @@ function renderClockIOBtn() {
 
 // ── Profile banner & account modal ───────────────────────
 function updateProfileBanner() {
+  // screen-app が表示されていない場合はスキップ
+  const appScreen = document.getElementById('screen-app');
+  if (!appScreen || appScreen.style.display === 'none') return;
+
   const av   = document.getElementById('pb-avatar');
   const name = document.getElementById('pb-name');
   const role = document.getElementById('pb-role');
