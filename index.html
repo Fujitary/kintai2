@@ -33,7 +33,7 @@
   }
 }
 html { height:100%; }
-body { height:100%; background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-serif; overflow:hidden; padding-top:var(--st); position:fixed; width:100%; }
+body { height:100%; background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-serif; overflow:hidden; padding-top:var(--st); position:fixed; width:100%; left:0; right:0; }
 
 /* ── Login / Loading ── */
 .login-screen,.loading-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:20px; padding:32px; }
@@ -60,7 +60,7 @@ body { height:100%; background:var(--bg); color:var(--text); font-family:'Noto S
 .setup-submit:active { opacity:.8; }
 
 /* ── Shell ── */
-.shell { display:flex; flex-direction:column; height:100vh; height:100dvh; max-width:480px; margin:0 auto; }
+.shell { display:flex; flex-direction:column; height:100vh; height:100dvh; width:100%; max-width:480px; margin:0 auto; }
 .topbar { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:12px 16px 10px; background:var(--bg); border-bottom:.5px solid var(--border); gap:8px; }
 .topbar-left { display:flex; align-items:center; gap:8px; min-width:0; }
 .topbar h1 { font-size:17px; font-weight:700; letter-spacing:-.02em; flex-shrink:0; }
@@ -387,9 +387,35 @@ body { height:100%; background:var(--bg); color:var(--text); font-family:'Noto S
       <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:12px;">URLの /d/ と /edit の間の文字列</div>
       <button class="save-btn" style="width:100%;padding:12px;" onclick="saveSpreadsheetId()">スプレッドシートを設定</button>
     </div>
-    <div class="modal-btns" style="margin-top:4px;">
+    <!-- フィードバック・バージョン -->
+    <div style="margin-top:12px;">
+      <button onclick="openFeedback()" style="width:100%;padding:12px;font-size:14px;font-family:'Noto Sans JP',sans-serif;font-weight:500;border-radius:10px;border:.5px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;margin-bottom:8px;touch-action:manipulation;">
+        💬 不具合・改善のフィードバックを送る
+      </button>
+      <button onclick="openModal('version-modal');closeModal('account-modal')" style="width:100%;padding:10px;font-size:13px;font-family:'Noto Sans JP',sans-serif;border-radius:10px;border:.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;touch-action:manipulation;">
+        ℹ️ バージョン情報
+      </button>
+    </div>
+    <div class="modal-btns" style="margin-top:8px;">
       <button class="cancel-btn" onclick="openModal('profile-modal');closeModal('account-modal')">プロフィール編集</button>
       <button class="save-btn" style="background:var(--danger);border-color:transparent;" onclick="signOut()">サインアウト</button>
+    </div>
+  </div>
+</div>
+
+<!-- Version modal -->
+<div class="modal-bg" id="version-modal" onclick="bgClick(event,'version-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>バージョン情報</h2>
+    <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;" id="v-number"></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="v-date"></div>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;">更新履歴</div>
+    <div id="v-changelog" style="font-size:13px;color:var(--text);line-height:2;"></div>
+    <div class="modal-btns" style="margin-top:16px;">
+      <button class="cancel-btn" onclick="closeModal('version-modal')">閉じる</button>
     </div>
   </div>
 </div>
@@ -492,31 +518,29 @@ function checkLunchBreak(startMs, endMs) {
 // ── Auth ──────────────────────────────────────────────────
 window.signInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
+  const ua = navigator.userAgent;
+
+  // LINE・Messenger・Instagram等のアプリ内ブラウザはGoogleにブロックされる
+  const isInAppBrowser = /FBAN|FBAV|Instagram|Line|Messenger/i.test(ua);
+  if (isInAppBrowser) {
+    alert('このブラウザではサインインできません。\nSafari（iPhone）またはChrome（Android）で\nhttps://fujitary.github.io/kintai2/\nを開いてください。');
+    return;
+  }
+
   try {
-    const ua = navigator.userAgent;
-    // iOS Safari: ITPによりリダイレクト後のセッション復元が失敗するためポップアップを使用
-    // Android / PC: リダイレクト方式
-    const isIOS = /iPhone|iPad|iPod/i.test(ua);
-    const isInAppBrowser = /FBAN|FBAV|Instagram|Line|Messenger/i.test(ua);
-
-    if (isInAppBrowser) {
-      // アプリ内ブラウザはGoogleにブロックされるため案内を表示
-      alert('このブラウザではサインインできません。\nSafari（iPhone）またはChrome（Android）で\nhttps://fujitary.github.io/kintai2/\nを開いてください。');
-      return;
-    }
-
-    if (isIOS) {
-      // iOSはポップアップ方式
-      await signInWithPopup(auth, provider);
-    } else {
-      // Android・PCはリダイレクト方式
-      await signInWithRedirect(auth, provider);
-    }
+    // 全端末ポップアップ方式に統一
+    // リダイレクト方式はiOS ITP・AndroidのCookie制限で不安定なため使用しない
+    await signInWithPopup(auth, provider);
   } catch(e) {
     console.error('signIn error:', e);
     if (e.code === 'auth/popup-blocked') {
-      alert('ポップアップがブロックされました。\nブラウザの設定でポップアップを許可してください。');
-    } else if (e.code !== 'auth/cancelled-popup-request') {
+      // ポップアップがブロックされた場合のみリダイレクトにフォールバック
+      try {
+        await signInWithRedirect(auth, provider);
+      } catch(e2) {
+        alert('サインインに失敗しました。\nブラウザの設定でポップアップを許可するか、\nページを再読み込みしてください。');
+      }
+    } else if (e.code !== 'auth/cancelled-popup-request' && e.code !== 'auth/popup-closed-by-user') {
       alert('サインインに失敗しました: ' + e.message);
     }
   }
@@ -526,7 +550,17 @@ window.signOut = async () => {
   stopListeners(); await fbSignOut(auth);
 };
 
-getRedirectResult(auth).catch(()=>{});
+// リダイレクト方式のフォールバック用（ポップアップブロック時のみ）
+getRedirectResult(auth).then(result => {
+  if (result?.user) {
+    // リダイレクト経由のサインイン成功はonAuthStateChangedで処理される
+    console.log('Redirect sign-in succeeded');
+  }
+}).catch(e => {
+  if (e.code && e.code !== 'auth/no-current-user') {
+    console.warn('getRedirectResult error:', e.code);
+  }
+});
 onAuthStateChanged(auth, async user => {
   if (user) { currentUser=user; await onUserSignedIn(); }
   else { currentUser=null; stopListeners(); showScreen('login'); }
@@ -829,6 +863,27 @@ function renderAccountModal() {
   }
 }
 
+// ── Feedback ──────────────────────────────────────────────
+window.openFeedback = () => {
+  // Googleフォームを作成後、以下のURLを書き換えてください
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe_PLACEHOLDER/viewform';
+  window.open(FORM_URL, '_blank');
+};
+
+// ── Version modal ──────────────────────────────────────────
+function renderVersionModal() {
+  const vNum  = document.getElementById('v-number');
+  const vDate = document.getElementById('v-date');
+  const vLog  = document.getElementById('v-changelog');
+  if (vNum)  vNum.textContent  = 'v' + APP_VERSION;
+  if (vDate) vDate.textContent = '最終更新: ' + APP_UPDATED;
+  if (vLog) {
+    vLog.innerHTML = APP_CHANGES.map(line =>
+      `<div style="padding:6px 0;border-bottom:.5px solid var(--border);">${line}</div>`
+    ).join('');
+  }
+}
+
 // ── Projects ──────────────────────────────────────────────
 window.addProject = async () => {
   const name=document.getElementById('new-project-name').value.trim();
@@ -1019,6 +1074,7 @@ window.openModal = id => {
     document.getElementById('edit-role').value=S.profile.role;
   }
   if (id==='account-modal') renderAccountModal();
+  if (id==='version-modal') renderVersionModal();
   document.getElementById(id).classList.add('open');
 };
 window.closeModal = id => document.getElementById(id).classList.remove('open');
