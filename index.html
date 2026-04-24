@@ -475,7 +475,7 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// 認証状態をlocalStorageに永続化（sessionStorageのブロック対策）
+// 認証状態をlocalStorageに永続化（sessionStorage/Cookie制限対策）
 setPersistence(auth, browserLocalPersistence).catch(e => console.warn('persistence:', e));
 
 // ── State ─────────────────────────────────────────────────
@@ -521,31 +521,30 @@ function checkLunchBreak(startMs, endMs) {
 // ── Auth ──────────────────────────────────────────────────
 window.signInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
+  const ua = navigator.userAgent;
+
+  // LINE/Messenger等のアプリ内ブラウザはGoogleにブロックされる
+  const isInAppBrowser = /FBAN|FBAV|Instagram|Line|Messenger/i.test(ua);
+  if (isInAppBrowser) {
+    alert('このブラウザではサインインできません。\nSafari（iPhone）またはChrome（Android）で\nhttps://fujitary.github.io/kintai2/\nを開いてください。');
+    return;
+  }
+
   try {
-    const ua = navigator.userAgent;
-    // iOS Safari: ITPによりリダイレクト後のセッション復元が失敗するためポップアップを使用
-    // Android / PC: リダイレクト方式
-    const isIOS = /iPhone|iPad|iPod/i.test(ua);
-    const isInAppBrowser = /FBAN|FBAV|Instagram|Line|Messenger/i.test(ua);
-
-    if (isInAppBrowser) {
-      // アプリ内ブラウザはGoogleにブロックされるため案内を表示
-      alert('このブラウザではサインインできません。\nSafari（iPhone）またはChrome（Android）で\nhttps://fujitary.github.io/kintai2/\nを開いてください。');
-      return;
-    }
-
-    if (isIOS) {
-      // iOSはポップアップ方式
-      await signInWithPopup(auth, provider);
-    } else {
-      // Android・PCはリダイレクト方式
-      await signInWithRedirect(auth, provider);
-    }
+    // 全端末ポップアップ方式に統一
+    // リダイレクト方式はiOS/AndroidのCookie/sessionStorage制限で不安定
+    await setPersistence(auth, browserLocalPersistence);
+    await signInWithPopup(auth, provider);
   } catch(e) {
-    console.error('signIn error:', e);
+    console.error('signIn error:', e.code, e.message);
     if (e.code === 'auth/popup-blocked') {
-      alert('ポップアップがブロックされました。\nブラウザの設定でポップアップを許可してください。');
-    } else if (e.code !== 'auth/cancelled-popup-request') {
+      // ポップアップがブロックされた場合のみリダイレクトにフォールバック
+      try { await signInWithRedirect(auth, provider); } catch(e2) { console.error(e2); }
+    } else if (e.code === 'auth/internal-error' || e.message?.includes('sessionStorage')) {
+      // sessionStorageブロックエラー → リダイレクトで再試行
+      alert('ブラウザの設定により通常のサインインができません。\nリダイレクト方式で再試行します。');
+      try { await signInWithRedirect(auth, provider); } catch(e2) { console.error(e2); }
+    } else if (e.code !== 'auth/cancelled-popup-request' && e.code !== 'auth/popup-closed-by-user') {
       alert('サインインに失敗しました: ' + e.message);
     }
   }
@@ -555,7 +554,12 @@ window.signOut = async () => {
   stopListeners(); await fbSignOut(auth);
 };
 
-getRedirectResult(auth).catch(()=>{});
+// リダイレクト方式フォールバック後の結果処理
+getRedirectResult(auth).then(result => {
+  if (result?.user) console.log('Redirect sign-in OK');
+}).catch(e => {
+  if (e.code && e.code !== 'auth/no-current-user') console.warn('redirect result:', e.code);
+});
 onAuthStateChanged(auth, async user => {
   if (user) { currentUser=user; await onUserSignedIn(); }
   else { currentUser=null; stopListeners(); showScreen('login'); }
